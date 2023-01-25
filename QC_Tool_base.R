@@ -29,35 +29,12 @@ LM_edta_combo$Combined_percent<-LM_edta_combo$delta1_percent+LM_edta_combo$delta
 
 write.csv(LM_edta_combo,"test.csv")
 
-LM_edta_combo$high<-30
-LM_edta_combo$delta1_percent_goal<-ifelse(LM_edta_combo$delta1_percent > 30, 2,
-                                     ifelse(LM_edta_combo$delta1_percent < 30 * 0.5, 0,
-                                            1))
-LM_edta_combo$delta2_percent_goal<-ifelse(LM_edta_combo$delta2_percent > 30, 2,
-                                     ifelse(LM_edta_combo$delta2_percent < 30 * 0.5, 0,
-                                            1))
-
-LM_edta_combo$Combined_percent_goal<-ifelse(LM_edta_combo$Combined_percent > 30, 2,
-                                     ifelse(LM_edta_combo$Combined_percent < 30 * 0.5, 0,
-                                            1))
-DT::datatable(LM_edta_combo,
-              rownames = FALSE,
-              options = list(
-                columnDefs = list(list(targets = c(5,6,7), visible = FALSE))
-              )
-) %>%
-  formatStyle(columns = "delta1",
-              valueColumns = "delta1_percent_goal",
-              backgroundColor = styleEqual(levels = c(0,1,2), values = c("#008000","#FFA500","#F00"))) %>%
-  formatStyle(columns = "delta2",
-              valueColumns = "delta2_percent_goal",
-              backgroundColor = styleEqual(levels = c(0,1,2), values = c("#008000","#FFA500","#F00"))) %>%
-
-  formatStyle(columns = "Combined_percent",
-              valueColumns = "Combined_percent_goal",
-              backgroundColor = styleEqual(levels = c(0,1,2), values = c("#008000","#FFA500","#F00")))
-
-
+datatable(LM_edta_combo) %>% formatStyle("delta1_percent",  backgroundColor = styleInterval(c(15, 30), c('green', 'orange', 'red')),
+                                         fontWeight = 'bold') %>%
+                             formatStyle("delta2_percent",  backgroundColor = styleInterval(c(15, 30), c('green', 'orange', 'red')),
+                                         fontWeight = 'bold') %>%
+                             formatStyle("Combined_percent",  backgroundColor = styleInterval(c(15, 30), c('green', 'orange', 'red')),
+                                        fontWeight = 'bold')
 
 
 
