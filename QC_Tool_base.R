@@ -1,9 +1,19 @@
 calculator<-function(t1,t2){
 
-
 #Model pre
-LM_edta_pre<-read.csv("A:/Projekte/2022/Analysis/PreAnalytik/Combo/no24/LM/Mixedmodels/LME_Pre_EDTA.csv",stringsAsFactors = FALSE)
-LM_edta_post<-read.csv("A:/Projekte/2022/Analysis/PreAnalytik/Combo/no24/LM/Mixedmodels/LME_Post_EDTA.csv",stringsAsFactors = FALSE)
+LM_pre<-read.csv("D:/Code/Projects/Main/QC-Tool/LME_Pre_All.csv",stringsAsFactors = FALSE)
+LM_post<-read.csv("D:/Code/Projects/Main/QC-Tool/LME_Post_All.csv",stringsAsFactors = FALSE)
+Type<-"EDTA"
+
+if(Type=="Serum"){
+  LM_edta_pre<-LM_pre %>% filter(Type=="Serum")
+  LM_edta_post<-LM_post %>% filter(Type=="Serum")
+} else if(Type=="EDTA"){
+  LM_edta_pre<-LM_pre %>% filter(Type=="EDTA")
+  LM_edta_post<-LM_post %>% filter(Type=="EDTA")
+} else if(Type=="LiHep"){
+  LM_edta_post<-LM_post %>% filter(Type=="LiHep")
+}
 
 LM_edta_pre_reduced<-data.frame(LM_edta_pre$name,LM_edta_pre$intercept,LM_edta_pre$slope)
 LM_edta_pre_reduced<-setNames(LM_edta_pre_reduced,c("Metabolite","PreInt","PreSlope"))
@@ -35,8 +45,4 @@ datatable(LM_edta_combo) %>% formatStyle("delta1_percent",  backgroundColor = st
                                          fontWeight = 'bold') %>%
                              formatStyle("Combined_percent",  backgroundColor = styleInterval(c(15, 30), c('green', 'orange', 'red')),
                                         fontWeight = 'bold')
-
-
-
-
 }

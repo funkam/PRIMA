@@ -1,59 +1,61 @@
+# NMR QC Tool
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#t
-# Find out more about building applications with Shiny here:
-#    http://shiny.rstudio.com/
+#
 #
 
 library(shiny)
 library(shinydashboard)
 library(dplyr)
 library(DT)
-
+library(shinyWidgets)
+#data input
+LM_pre<-read.csv("LME_Pre_All.csv",stringsAsFactors = FALSE)
+LM_post<-read.csv("LME_Post_All.csv",stringsAsFactors = FALSE)
 
 # Scripts -----------------------------------------------------------------
-calculator<-function(t1,t2){
+calculator<-function(data_pre,data_post,t1,t2){
   #Model pre
-  LM_edta_pre<-read.csv("A:/Projekte/2022/Analysis/PreAnalytik/Combo/no24/LM/Mixedmodels/LME_Pre_EDTA.csv",stringsAsFactors = FALSE)
-  LM_edta_post<-read.csv("A:/Projekte/2022/Analysis/PreAnalytik/Combo/no24/LM/Mixedmodels/LME_Post_EDTA.csv",stringsAsFactors = FALSE)
+  LM_pre<-data_pre
+  LM_post<-data_post
 
-  LM_edta_pre_reduced<-data.frame(LM_edta_pre$name,LM_edta_pre$intercept,LM_edta_pre$slope)
-  LM_edta_pre_reduced<-setNames(LM_edta_pre_reduced,c("Metabolite","PreInt","PreSlope"))
-  LM_edta_post_reduced<-data.frame(LM_edta_post$name,LM_edta_post$intercept,LM_edta_post$slope)
-  LM_edta_post_reduced<-setNames(LM_edta_post_reduced,c("Metabolite","PostInt","PostSlope"))
-  LM_edta_combo<-inner_join(LM_edta_pre_reduced,LM_edta_post_reduced,by="Metabolite")
+  #rearrange data frames and rename
+  LM_pre_reduced<-data.frame(LM_pre$name,LM_pre$intercept,LM_pre$slope)
+  LM_pre_reduced<-setNames(LM_pre_reduced,c("Metabolite","PreInt","PreSlope"))
+  LM_post_reduced<-data.frame(LM_post$name,LM_post$intercept,LM_post$slope)
+  LM_post_reduced<-setNames(LM_post_reduced,c("Metabolite","PostInt","PostSlope"))
+  LM_combo<-inner_join(LM_pre_reduced,LM_post_reduced,by="Metabolite")
 
-  #calulate overall change
-  LM_edta_combo$x2<-t1*(LM_edta_combo$PreSlope)+LM_edta_combo$PreInt
+  #calulate deltas
+  LM_combo$x2<-t1*(LM_combo$PreSlope)+LM_combo$PreInt
+  LM_combo$x3<-t2*(LM_combo$PostSlope)+LM_combo$x2
+  LM_combo$delta1<-(LM_combo$x2)-(LM_combo$PreInt)
+  LM_combo$delta1_percent<-((LM_combo$delta1))*100/(LM_combo$PreInt)
+  LM_combo$delta2<-((LM_combo$x3)-(LM_combo$x2))
+  LM_combo$delta2_percent<-((LM_combo$delta2))*100/(LM_combo$x2)
+  LM_combo$combined_percent<-LM_combo$delta1_percent+LM_combo$delta2_percent
 
-  LM_edta_combo$x3<-t2*(LM_edta_combo$PostSlope)+LM_edta_combo$x2
-  LM_edta_combo$delta1<-(LM_edta_combo$x2)-(LM_edta_combo$PreInt)
-  LM_edta_combo$delta1_percent<-((LM_edta_combo$delta1))*100/(LM_edta_combo$PreInt)
-
-  LM_edta_combo$delta2<-((LM_edta_combo$x3)-(LM_edta_combo$x2))
-  LM_edta_combo$delta2_percent<-((LM_edta_combo$delta2))*100/(LM_edta_combo$x2)
-  LM_edta_combo$Combined_percent<-LM_edta_combo$delta1_percent+LM_edta_combo$delta2_percent
-  final<-data.frame(LM_edta_combo$Metabolite,LM_edta_combo$delta1_percent,LM_edta_combo$delta2_percent,LM_edta_combo$Combined_percent)
-  final<-setNames(final,c("Metabolite","Pre-Cent Change","Post-Cent Change","Combined_Change"))
+  #combine final data frame
+  final<-data.frame(LM_combo$Metabolite,LM_combo$delta1_percent,LM_combo$delta2_percent,LM_combo$combined_percent)
+  final<-setNames(final,c("Metabolite","PreCent","PostCent","Combined"))
 }
 
 
 
-# Define UI for application that draws a histogram
+# UI ----------------------------------------------------------------------
 ui <- fluidPage(
 
-    # Application title
+
     titlePanel("NMR QC Panel"),
 
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
+        radioGroupButtons("sample_type","Select sample type",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",individual=TRUE),
         sliderInput("TTZ",
                         "Pre-Centrifugation Time:",
                         min = 0,
                         max = 8,
-                        value = 1,
+                        value = 0,
                         step=0.1
                     ),
 
@@ -61,32 +63,63 @@ ui <- fluidPage(
                     "Post Centifugation Time:",
                     min = 0,
                     max = 8,
-                    value = 1,
+                    value = 0,
                     step=0.1)
 
     ),
     mainPanel(
-          div(style = 'overflow-x: scroll',  DT::dataTableOutput('datatable'))
+          DT::dataTableOutput('datatable')
+
 
         )
     )
     )
 
 
-# Define server logic required to draw a histogram
+# Server ------------------------------------------------------------------
 server <- function(input, output) {
   pre<-reactive({input$TTZ})
   post<-reactive({input$TTF})
+  type<-reactive({switch(input$sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
 
-
-  calculatro_reactive<-reactive({
-    final<-calculator(pre(),post())
+  data_pre<-reactive({
+    type<-type()
+    if(type=="Serum"){
+    df<-LM_pre %>% filter(Type=="Serum")
+    } else if(type=="EDTA"){
+      df<-LM_pre %>% filter(Type=="EDTA")
+      } else if(type=="LiHep"){
+        df<-LM_pre %>% filter(Type=="LiHep")
+        }
+  })
+  data_post<-reactive({
+    type<-type()
+    if(type=="Serum"){
+      df<-LM_post %>% filter(Type=="Serum")
+    } else if(type=="EDTA"){
+      df<-LM_post %>% filter(Type=="EDTA")
+    } else if(type=="LiHep"){
+      df<-LM_post %>% filter(Type=="LiHep")
+    }
   })
 
-  output$datatable<-renderDataTable({
-    testy<-datatable(
-    calculatro_reactive(),
 
+
+    calc_reactive<-reactive({
+      req(data_pre(),data_post())
+    final<-calculator(data_pre(),data_post(),pre(),post())
+  })
+
+
+#output data table and color 15% and 30%
+  output$datatable<-renderDataTable({
+    datatable(calc_reactive())  %>% formatStyle("PreCent",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
+                                fontWeight = 'bold') %>%
+                                formatStyle("PostCent",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
+                                fontWeight = 'bold') %>%
+                                formatStyle("Combined",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
+                                fontWeight = 'bold') %>%
+                                formatRound(columns=c("PreCent","PostCent","Combined"),digits=2)
   })
 }
 
