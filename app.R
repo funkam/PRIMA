@@ -8,6 +8,7 @@ library(shinydashboard)
 library(dplyr)
 library(DT)
 library(shinyWidgets)
+library(rmarkdown)
 #data input
 LM_pre<-read.csv("LME_Pre_All.csv",stringsAsFactors = FALSE)
 LM_post<-read.csv("LME_Post_All.csv",stringsAsFactors = FALSE)
@@ -40,17 +41,16 @@ calculator<-function(data_pre,data_post,t1,t2){
 }
 
 
-
 # UI ----------------------------------------------------------------------
 ui <- fluidPage(
 
 
-    titlePanel("NMR QC Panel"),
+    titlePanel("Metabolomics QC Panel"),
 
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-        radioGroupButtons("sample_type","Select sample type",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",individual=TRUE),
+        radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",individual=TRUE),
         sliderInput("TTZ",
                         "Pre-Centrifugation Time:",
                         min = 0,
@@ -60,7 +60,7 @@ ui <- fluidPage(
                     ),
 
         sliderInput("TTF",
-                    "Post Centifugation Time:",
+                    "Post-Centifugation Time:",
                     min = 0,
                     max = 8,
                     value = 0,
@@ -69,8 +69,6 @@ ui <- fluidPage(
     ),
     mainPanel(
           DT::dataTableOutput('datatable')
-
-
         )
     )
     )
@@ -108,19 +106,22 @@ server <- function(input, output) {
     calc_reactive<-reactive({
       req(data_pre(),data_post())
     final<-calculator(data_pre(),data_post(),pre(),post())
+    final<-datatable(final)  %>%  formatStyle("PreCent",  backgroundColor = styleInterval(c(-30, -15, 15, 30), c('red', 'orange', '', 'orange','red' )),
+                                                fontWeight = 'bold') %>%
+                                  formatStyle("PostCent",  backgroundColor = styleInterval(c(-30,-15, 15, 30), c('red', 'orange', '', 'orange', 'red')),
+                                                fontWeight = 'bold') %>%
+                                  formatStyle("Combined",  backgroundColor = styleInterval(c(-30,-15, 15, 30), c('red', 'orange', '', 'orange', 'red')),
+                                                fontWeight = 'bold') %>%
+                                  formatRound(columns=c("PreCent","PostCent","Combined"),digits=2)
   })
 
 
 #output data table and color 15% and 30%
   output$datatable<-renderDataTable({
-    datatable(calc_reactive())  %>% formatStyle("PreCent",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
-                                fontWeight = 'bold') %>%
-                                formatStyle("PostCent",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
-                                fontWeight = 'bold') %>%
-                                formatStyle("Combined",  backgroundColor = styleInterval(c(15, 30), c('', 'orange', 'red')),
-                                fontWeight = 'bold') %>%
-                                formatRound(columns=c("PreCent","PostCent","Combined"),digits=2)
+    calc_reactive()
   })
+
+
 }
 
 # Run the application
