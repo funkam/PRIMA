@@ -1,14 +1,12 @@
 # NMR QC Tool
 #
-#terst
 #
 
 library(shiny)
 library(shinydashboard)
 library(dplyr)
 library(DT)
-library(shinyWidgets)
-library(rmarkdown)
+
 #data input
 LM_pre<-read.csv("LME_Pre_All.csv",stringsAsFactors = FALSE)
 LM_post<-read.csv("LME_Post_All.csv",stringsAsFactors = FALSE)
@@ -50,28 +48,26 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-        radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",individual=TRUE),
-        sliderInput("TTZ",
+          radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",individual=TRUE),
+          sliderInput("TTZ",
                         "Pre-Centrifugation Time:",
                         min = 0,
                         max = 8,
                         value = 0,
                         step=0.1
                     ),
-
-        sliderInput("TTF",
+          sliderInput("TTF",
                     "Post-Centifugation Time:",
                     min = 0,
                     max = 8,
                     value = 0,
                     step=0.1)
-
-    ),
-    mainPanel(
+        ),
+       mainPanel(
           DT::dataTableOutput('datatable')
-        )
+       )
     )
-    )
+)
 
 
 # Server ------------------------------------------------------------------
@@ -80,6 +76,7 @@ server <- function(input, output) {
   post<-reactive({input$TTF})
   type<-reactive({switch(input$sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
 
+#filter data
   data_pre<-reactive({
     type<-type()
     if(type=="Serum"){
@@ -90,6 +87,7 @@ server <- function(input, output) {
         df<-LM_pre %>% filter(Type=="LiHep")
         }
   })
+#filter data
   data_post<-reactive({
     type<-type()
     if(type=="Serum"){
@@ -102,7 +100,7 @@ server <- function(input, output) {
   })
 
 
-
+#calculate percentages and create colored table
     calc_reactive<-reactive({
       req(data_pre(),data_post())
     final<-calculator(data_pre(),data_post(),pre(),post())
