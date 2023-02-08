@@ -17,6 +17,7 @@ LM_pre<-read.csv("LME_Pre_All.csv",stringsAsFactors = FALSE)
 LM_post<-read.csv("LME_Post_All.csv",stringsAsFactors = FALSE)
 
 # Scripts -----------------------------------------------------------------
+#Calculator, calucaltes the % based on the LME models and using the inputs of pre/post centrifugation times
 calculator<-function(data_pre,data_post,t1,t2){
   #Model pre
   LM_pre<-data_pre
@@ -43,37 +44,19 @@ calculator<-function(data_pre,data_post,t1,t2){
   final<-setNames(final,c("Metabolite","PreCent","PostCent","Combined"))
 }
 
-lollipops<-function(data,input_time){
-  data<-data %>% filter(Timepoint<input_time)
-  data<-data %>% mutate(name = fct_reorder(name, Timepoint))
-  plotl<<-ggplot(data,aes(x=name,y=Timepoint,color=Type))+
-    geom_segment(aes(x=name,xend=name,y=0,yend=Timepoint),color="black")+
-    geom_point(aes(fill=Type,size=4,shape=Type)) +
-    scale_y_continuous(breaks = round(seq(0, max(data$Timepoint), by = 2),1)) +
-    xlab("")+
-    ylab("Stability / hours")+
-    theme_minimal()+
-    theme(legend.position="blank")+
-    coord_flip()
-  plotl<-plotl
-}
-
 # UI ----------------------------------------------------------------------
 ui <- dashboardPage(
     dashboardHeader(title="NMR QC"),
     dashboardSidebar(
-      sidebarMenu(collapsed=FALSE,
+      sidebarMenu(
+                  collapsed=FALSE,
                   menuItem("Home", tabName = "home", icon = icon("home"),selected=T),
-                  menuItem("peripheral Blood",tabName="blood_tables",icon=icon("syringe")
-                           #menuSubItem("Tables", tabName = "blood_tables", icon = icon("table")),
-                           #menuSubItem("Plots", tabName = "blood_plots", icon = icon("chart-line"))
-                           )
+                  menuItem("peripheral Blood",tabName="blood_tables",icon=icon("syringe"))
       )
     ),
-    # Sidebar with a slider input for number of bins
+
     dashboardBody(
       tabItems(
-
           tabItem(tabName="home",
                   fluidRow(
                     box(width=6,
@@ -84,104 +67,87 @@ ui <- dashboardPage(
                         p("Institute for Clinical Chemistry and Laboratory Medicine"),
                         p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
                         ),
-                    box(width=6,
-                      column(width=6,align="center",
-
-                         img(src='hexlogo.png',width="40%")
-
+                    box(width=3,
+                      column(width=6,align="left",
+                             br(),
+                             h3("Links:"),
+                             p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
+                             p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
+                             p(a("Publication",href=""))
                       ),
                       column(width=6,
-
-                          h3("Links:"),
-                          p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
-                          p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
-                          p(a("Publication",href=""))
-
-
-
+                             br(),
+                             img(src='hexlogo.png',width="100%")
                       )
                     )
-
                   ),
                   fluidRow(
                     box(
                       h4(HTML("<b>Description</b>")),
                       p("Here we used data of samples with different pre- and post centrifugation times."),
-                      p("Linear mixes models were created to show the change of multiple metabolites over time"),
+                      p("Linear mixes models were created to show the change of multiple metabolites over time."),
                       p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
-                      p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time")
-
+                      p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time.")
                     )
-
-
                   )
-
-
-
-
-
-                  ),
+          ),
           tabItem(tabName="blood_tables",
                   fluidRow(
-                  box(
-                      width=2,title="Sample Type",solidHeader=TRUE,status="primary",
-                      column(width=12,align="center",
-                      radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
-                      )
+                          box(
+                              width=2,title="Sample Type",solidHeader=TRUE,status="primary",
+                                column(
+                                    width=12,align="center",
+                                    radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
+                                )
+                          ),
+                          box(
+                              width=5,title="Style",solidHeader=TRUE,status="primary",
+                              fluidRow(
+                                column(width=4,
+                                       box(width=12,
+                                           numericInput("minor","Minor color %:",value=15),
+                                           colourInput("minor_color","Minor Color:",value="orange"))
+                                ),
+                                column(width=4,
+                                       box(width=12,
+                                           numericInput("major","Major color %:",value=30),
+                                           colourInput("major_color","Major Color:",value="red")
+                                       )
+                                ),
+                                column(width=4,
+                                       box(width=12,
+                                           colourInput("neutral_color","Neutral Color:",value="")
+                                       )
+                                )
+                              )
+                          ),
+                          box(
+                            width=3,title="Download Output",solidHeader=TRUE,status="primary",
+                            downloadButton("report", "Generate HTML report")
+                            )
                   ),
-                  box(
-                      width=5,title="Style",solidHeader=TRUE,status="primary",
-                      fluidRow(
-                        column(width=4,
-                               box(width=12,
-                                   numericInput("minor","Minor color %:",value=15),
-                                   colourInput("minor_color","Minor Color:",value="orange"))
-                        ),
-                        column(width=4,
-                               box(width=12,
-                                   numericInput("major","Major color %:",value=30),
-                                   colourInput("major_color","Major Color:",value="red")
-                               )
-                        ),
-                        column(width=4,
-                               box(width=12,
-                                   colourInput("neutral_color","Neutral Color:",value="")
-                               )
-                        )
-                      )
+                  fluidRow(
+                          box(width=10,title="Centrifugation Times",solidHeader=TRUE,status="primary",
+                              sliderInput("TTZ",
+                                          "Pre-Centrifugation Time:",
+                                          min = 0,
+                                          max = 10,
+                                          value = 0,
+                                          step=0.1
+                              ),
+                              sliderInput("TTF",
+                                          "Post-Centifugation Time:",
+                                          min = 0,
+                                          max = 10,
+                                          value = 0,
+                                          step=0.1)
+                          )
+                  ),
+                  fluidRow(
+                          box(width=12,
+                            DT::dataTableOutput('datatable')
+                          )
                   )
-                  ),
-                  fluidRow(
-                    box(width=10,title="Centrifugation Times",solidHeader=TRUE,status="primary",
-                        sliderInput("TTZ",
-                                    "Pre-Centrifugation Time:",
-                                    min = 0,
-                                    max = 10,
-                                    value = 0,
-                                    step=0.1
-                        ),
-                        sliderInput("TTF",
-                                    "Post-Centifugation Time:",
-                                    min = 0,
-                                    max = 10,
-                                    value = 0,
-                                    step=0.1)
-                    )
-
-                  ),
-                  fluidRow(
-                    box(width=12,
-                    DT::dataTableOutput('datatable')
-                    )
-                  ),
-                  fluidRow(
-                    radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
-                                 inline = TRUE),
-                    downloadButton("downloadcsv", "Generate CSV"),
-                    downloadButton("report", "Generate PDF")
-
-
-)
           ),
           tabItem(tabName="blood_plots",
                   sliderInput("input_time_ttz", "Adjust highest pre-centrifugation time shown:",
@@ -200,15 +166,10 @@ ui <- dashboardPage(
     )
 )
 
-
-
 # Server ------------------------------------------------------------------
 server <- function(input, output) {
-
-
 ####Blood Tables
-
-   pre<-reactive({input$TTZ})
+  pre<-reactive({input$TTZ})
   post<-reactive({input$TTF})
   type<-reactive({switch(input$sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
   major<-reactive({input$major})
@@ -240,40 +201,37 @@ server <- function(input, output) {
     }
   })
 
-
 #calculate percentages and create colored table
     calc_reactive<-reactive({
       req(data_pre(),data_post())
       final<-calculator(data_pre(),data_post(),pre(),post())
       color_changes<-c(-major(),-minor(),minor(),major())
       colors<-c(major_color(),minor_color(),neutral_color(),minor_color(),major_color())
-    final<-datatable(final)  %>%  formatStyle("PreCent",  backgroundColor = styleInterval(color_changes,colors),
-                                                fontWeight = 'bold') %>%
-                                  formatStyle("PostCent",  backgroundColor = styleInterval(color_changes,colors),
-                                                fontWeight = 'bold') %>%
-                                  formatStyle("Combined",  backgroundColor = styleInterval(color_changes,colors),
-                                                fontWeight = 'bold') %>%
-                                  formatRound(columns=c("PreCent","PostCent","Combined"),digits=2)
-  })
+      final<-datatable(final,
+                       extensions = 'Buttons',
+                       options = list(dom = 'lfrtpB',
+                                      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                                      lengthMenu = list(c(25, 100, -1), c('10','25','100', 'All')),
+                                      pageLength=10
+                                  )
+                       )  %>%
+                           formatStyle("PreCent",  backgroundColor = styleInterval(color_changes,colors),
+                                      fontWeight = 'bold') %>%
+                           formatStyle("PostCent",  backgroundColor = styleInterval(color_changes,colors),
+                                      fontWeight = 'bold') %>%
+                           formatStyle("Combined",  backgroundColor = styleInterval(color_changes,colors),
+                                      fontWeight = 'bold') %>%
+                           formatRound(columns=c("PreCent","PostCent","Combined"),digits=2)
+      })
 
-
-#output data table and color 15% and 30%
+#output data table
   output$datatable<-renderDataTable({
     calc_reactive()
-  })
+   })
 
-  output$downloadcsv <- downloadHandler(
-    filename = function() {
-      paste("Metabolite_Stability.csv")
-    },
-    content = function(file) {
-      write.csv(calc_reactive(), file, row.names = FALSE)
-    }
-  )
-
+#Download R Markdown html
   output$report <- downloadHandler(
-    # For PDF output, change this to "report.pdf"
-    filename = "report.pdf",
+    filename = "QC.Report.html",
     content = function(file) {
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
@@ -293,33 +251,14 @@ server <- function(input, output) {
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
       # from the code in this app).
-      out<-rmarkdown::render(tempReport, output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv())
+      out<-rmarkdown::render(
+                                tempReport,
+                                params = params,
+                                envir = new.env(parent = globalenv())
       )
       file.rename(out,file)
     }
   )
-
-
-
-
-####Blood Plots
-  pre_max<-reactive({input$input_time_TTZ})
-  post_max<-reactive({input$input_time_TTF})
-
-
-
-
-  pre_plot<-reactive({
-    req(input$input_time_TTZ)
-    plotl<-lollipops(LM_pre,pre_max())
-  })
-
-  output$pre_lolli<-renderPlot({
-    pre_plot()
-  })
-
 }
 
 # Run the application
