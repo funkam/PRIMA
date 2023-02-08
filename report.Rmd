@@ -1,0 +1,24 @@
+---
+title: "QC-Report"
+date: "`r Sys.Date()`"
+output: pdf_document
+params:
+  TTZ: NA
+  TTF: NA
+  table: NA
+  minor: NA
+  major: NA
+---
+# Selected parameters
+Pre-Centrifugation Time: `r params$TTZ`
+
+Post Centrifugation Time:`r params$TTF`
+
+Minor Threshold: `r params$minor`
+
+Major Threshold: `r params$major`
+
+# Data Table
+``` {r, echo=FALSE}
+params$table
+```
