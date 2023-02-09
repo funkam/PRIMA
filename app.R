@@ -1,6 +1,4 @@
 # NMR QC Tool
-#
-#
 
 library(shiny)
 library(shinyWidgets)
@@ -62,7 +60,7 @@ ui <- dashboardPage(
                     box(width=6,
                         h1("NMR Metabolomics Quality Control Panel"),
                         #h3(HTML("<b>NMR</b>")),
-                        p("A tool for quality control of Metabolomics of peripheral blood."),
+                        p("A tool for investigating the quality and stability of metabolites in peripheral blood."),
                         p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
                         p("Institute for Clinical Chemistry and Laboratory Medicine"),
                         p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
@@ -73,7 +71,7 @@ ui <- dashboardPage(
                              h3("Links:"),
                              p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
                              p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
-                             p(a("Publication",href=""))
+                             #p(a("Publication",href=""))
                       ),
                       column(width=6,
                              br(),
@@ -83,7 +81,7 @@ ui <- dashboardPage(
                   ),
                   fluidRow(
                     box(
-                      h4(HTML("<b>Description</b>")),
+                      h3(HTML("<b>Description</b>")),
                       p("Here we used data of samples with different pre- and post centrifugation times."),
                       p("Linear mixes models were created to show the change of multiple metabolites over time."),
                       p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
@@ -123,6 +121,7 @@ ui <- dashboardPage(
                           ),
                           box(
                             width=3,title="Download Output",solidHeader=TRUE,status="primary",
+                            p("Download a report as interactive HTML file.",align="justify"),
                             downloadButton("report", "Generate HTML report")
                             )
                   ),
