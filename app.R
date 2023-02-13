@@ -12,11 +12,11 @@ library(rmarkdown)
 library(forcats)
 
 #data input
-LM_pre<-read.csv("PreCent_LM_all_final.csv",stringsAsFactors = FALSE)
-LM_post<-read.csv("PostCent_LM_all_final.csv",stringsAsFactors = FALSE)
+LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)
+LM_post<-read.csv("Postcent_LM_all_final.csv",stringsAsFactors = FALSE)
 
 # Scripts -----------------------------------------------------------------
-#Calculator, calucaltes the % based on the LME models and using the inputs of pre/post centrifugation times
+#Calculator, calculates the % based on the LME models and using the inputs of pre/post centrifugation times
 calculator<-function(data_pre,data_post,t1,t2){
   #Model pre
   LM_pre<-data_pre
@@ -69,20 +69,18 @@ ui <- dashboardPage(
                         p("Institute for Clinical Chemistry and Laboratory Medicine"),
                         p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
                         ),
-                    box(width=3,
-                      column(width=6,align="left",
-                             br(),
-                             h3("Links:"),
+                     box(width=2,title="Links",solidHeader=TRUE,status="primary",
                              p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
                              p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
                              #p(a("Publication",href=""))
+                             )
                       ),
-                      column(width=6,
-                             br(),
-                             img(src='hexlogo.png',width="92%")
-                      )
-                    )
-                  ),
+                      # column(width=6,
+                      #        br(),
+                      #        img(src='hexlogo.png',width="92%")
+                      # )
+
+
                   fluidRow(
                     box(title="Description",solidHeader=TRUE,status="primary",
                       p("Linear mixes models were created to show the change of multiple metabolites over time."),
