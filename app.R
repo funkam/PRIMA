@@ -9,10 +9,11 @@ library(plotly)
 library(ggplot2)
 library(colourpicker)
 library(rmarkdown)
+library(forcats)
 
 #data input
-LM_pre<-read.csv("LME_Pre_All.csv",stringsAsFactors = FALSE)
-LM_post<-read.csv("LME_Post_All.csv",stringsAsFactors = FALSE)
+LM_pre<-read.csv("PreCent_LM_all_final.csv",stringsAsFactors = FALSE)
+LM_post<-read.csv("PostCent_LM_all_final.csv",stringsAsFactors = FALSE)
 
 # Scripts -----------------------------------------------------------------
 #Calculator, calucaltes the % based on the LME models and using the inputs of pre/post centrifugation times
@@ -49,7 +50,10 @@ ui <- dashboardPage(
       sidebarMenu(
                   collapsed=FALSE,
                   menuItem("Home", tabName = "home", icon = icon("home"),selected=T),
-                  menuItem("peripheral Blood",tabName="blood_tables",icon=icon("syringe"))
+                  menuItem("peripheral Blood",icon=icon("syringe"),
+                           menuSubItem("Plots",tabName="blood_plots",icon=icon(("chart-bar"))),
+                           menuSubItem("Tables",tabName="blood_tables",icon=icon(("table")))
+                           )
       )
     ),
 
@@ -75,20 +79,58 @@ ui <- dashboardPage(
                       ),
                       column(width=6,
                              br(),
-                             img(src='hexlogo.png',width="100%")
+                             img(src='hexlogo.png',width="92%")
                       )
                     )
                   ),
                   fluidRow(
-                    box(
-                      h3(HTML("<b>Description</b>")),
-                      p("Here we used data of samples with different pre- and post centrifugation times."),
+                    box(title="Description",solidHeader=TRUE,status="primary",
                       p("Linear mixes models were created to show the change of multiple metabolites over time."),
                       p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
-                      p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time.")
+                      p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time."),
+                      p("The Panel is split into producing plots, as well as color-coded tables.")
                     )
+                  ),
+                  fluidRow(
+                    box(title="Plots",solidHeader=TRUE,status="primary",
+                        p("In the 'Plots' tab the user can enter a percentage limit for metabolite change (default 30%), as well as a end time point for the plot (in hours).",br(),br(),"Lollipop plots are then generated dynamically with the given input, giving an overview of the different metabolites and the calucalted time for the given change",br(),br(),"Datapoints are shown for each of the different coagulation tubes.")
+                        ),
+                    box(title="Tables",solidHeader=TRUE,status="primary",
+                        p("The 'Tables' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a Slider.",br(),br(),"A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe",br(),br(),"The colors, as well as the % threshholds, can be adjusted.",br(),br(),"The table can be downloaded as a .HTML report or the table directly as .csv (or other formats).")
+                        )
                   )
           ),
+
+          tabItem(tabName="blood_plots",
+                  fluidRow(
+                    column(width=6,
+                      box(width=4, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
+                                  numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=30),
+                                  numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
+                        )
+                    ),
+                    column(width=6,
+                           box(width=4, title="Post-Centrifugation Input",solidHeader=TRUE, status="primary",
+                               numericInput("pb_plots_post_percent","Enter threshhold (%)",value=30),
+                               numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
+                           )
+                    ),
+                    ),
+                        fluidRow(
+                          column(width=6,
+                            box(width=12,title="Pre-Centrifugation",solidHeader=TRUE,status="primary",
+                                div(style="height:1000px",plotlyOutput(width="100%", height="1000px","pb_lollis_pre"))
+                            )
+                          ),
+                          column(width=6,
+                                 box(width=12,title="Post-Centrifugation",solidHeader=TRUE,status="primary",
+                                     div(style="height:1000px",plotlyOutput(width="100%", height="1000px","pb_lollis_post"))
+                                 )
+                          )
+                        )
+                  ),
+
+
           tabItem(tabName="blood_tables",
                   fluidRow(
                           box(
@@ -167,6 +209,75 @@ ui <- dashboardPage(
 
 # Server ------------------------------------------------------------------
 server <- function(input, output) {
+
+####Blood PLots
+    pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
+    pb_plots_pre_cutoff<-reactive({input$pb_plots_pre_cutoff})
+
+    pb_plots_post_percent<-reactive({input$pb_plots_post_percent})
+    pb_plots_post_cutoff<-reactive({input$pb_plots_post_cutoff})
+
+  #create reactive table
+    pb_table_pre_lollis<-reactive({
+      req(input$pb_plots_pre_percent)
+      precent_lollis<-LM_pre
+      precent_lollis$percent<-precent_lollis$intercept*(pb_plots_pre_percent()/100)
+      precent_lollis$limit<-ifelse((precent_lollis$slope < 0), c(precent_lollis$intercept-precent_lollis$percent),c(precent_lollis$intercept+precent_lollis$percent))
+      precent_lollis$timepoint<-(precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope
+      precent_lollis<-precent_lollis
+    })
+
+    pb_table_post_lollis<-reactive({
+      req(input$pb_plots_post_percent)
+      postcent_lollis<-LM_post
+      postcent_lollis$percent<-postcent_lollis$intercept*(pb_plots_post_percent()/100)
+      postcent_lollis$limit<-ifelse((postcent_lollis$slope < 0), c(postcent_lollis$intercept-postcent_lollis$percent),c(postcent_lollis$intercept+postcent_lollis$percent))
+      postcent_lollis$timepoint<-(postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope
+      postcent_lollis<-postcent_lollis
+    })
+  #create plot
+    pb_plot_pre_lollis<-reactive({
+      req(input$pb_plots_pre_cutoff)
+      precent_lollis<-pb_table_pre_lollis()
+      precent_lollis<-precent_lollis %>% filter(timepoint<pb_plots_pre_cutoff())
+      precent_lollis<-precent_lollis %>% mutate(name = fct_reorder(name, timepoint))
+      pre_lollis_plot<-ggplot(precent_lollis,aes(x=name,y=timepoint,color=Type))+
+        geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
+        geom_point(aes(fill=Type,size=2,shape=Type)) +
+        scale_y_continuous(breaks = round(seq(0, max(precent_lollis$timepoint), by = 2),1)) +
+        xlab("")+
+        ylab("Stability / hours")+
+        theme_minimal()+
+        theme(legend.position="blank")+
+        coord_flip()
+    })
+    #create plot
+    pb_plot_post_lollis<-reactive({
+      req(input$pb_plots_post_cutoff)
+      postcent_lollis<-pb_table_post_lollis()
+      postcent_lollis<-postcent_lollis %>% filter(timepoint<pb_plots_post_cutoff())
+      postcent_lollis<-postcent_lollis %>% mutate(name = fct_reorder(name, timepoint))
+      post_lollis_plot<-ggplot(postcent_lollis,aes(x=name,y=timepoint,color=Type))+
+        geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
+        geom_point(aes(fill=Type,size=2,shape=Type)) +
+        scale_y_continuous(breaks = round(seq(0, max(postcent_lollis$timepoint), by = 2),1)) +
+        xlab("")+
+        ylab("Stability / hours")+
+        theme_minimal()+
+        theme(legend.position="blank")+
+        coord_flip()
+    })
+
+  #plot output
+     output$pb_lollis_pre<-renderPlotly({
+       pb_plot_pre_lollis()
+     })
+
+     output$pb_lollis_post<-renderPlotly({
+       pb_plot_post_lollis()
+     })
+
+
 ####Blood Tables
   pre<-reactive({input$TTZ})
   post<-reactive({input$TTF})
