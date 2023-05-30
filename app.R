@@ -50,10 +50,12 @@ ui <- dashboardPage(
       sidebarMenu(
                   collapsed=FALSE,
                   menuItem("Home", tabName = "home", icon = icon("home"),selected=T),
-                  menuItem("peripheral Blood",icon=icon("syringe"),
-                           menuSubItem("Plots",tabName="blood_plots",icon=icon(("chart-bar"))),
-                           menuSubItem("Tables",tabName="blood_tables",icon=icon(("table")))
-                           )
+                  menuItem("Data",tabName="blood_data_plots",icon=icon(("newspaper")),
+                  menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("backward"))),
+                  menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("forward")))
+                  ),
+                  menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")))
+
       )
     ),
 
@@ -99,34 +101,112 @@ ui <- dashboardPage(
                   )
           ),
 
-          tabItem(tabName="blood_plots",
+          tabItem(tabName="blood_data_pre",
                   fluidRow(
-                    column(width=6,
-                      box(width=4, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
+                    column(width=3,
+                      box(width=10, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
                                   numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=30),
                                   numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
                         )
                     ),
-                    column(width=6,
-                           box(width=4, title="Post-Centrifugation Input",solidHeader=TRUE, status="primary",
+                    column(width=3,
+                        box(width=12,title="Info",solidHeader=TRUE,status="danger",
+                            p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
+                            p("The plot cutoff can be used to declutter the lollipop plots"),
+                            p("The table displays the different parameters according to the SPREC caterogies.")
+                        )
+                    )
+                    ),
+                  fluidRow(
+                    tabBox(width=12,
+                      tabPanel(title="Table",
+                               fluidRow(
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: A1 (<30min) ",
+                                     DT::dataTableOutput('pb_table_pre_a1')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: A (<2h)",
+                                     DT::dataTableOutput('pb_table_pre_a')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: C (2-4h)",
+                                     DT::dataTableOutput('pb_table_pre_c')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: E (4-8h)",
+                                     DT::dataTableOutput('pb_table_pre_e')
+                                 )
+                               ),
+                               fluidRow(
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: G (8-12h)",
+                                     DT::dataTableOutput('pb_table_pre_g')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: I (12-24h)",
+                                     DT::dataTableOutput('pb_table_pre_i')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: K (24-48h)",
+                                     DT::dataTableOutput('pb_table_pre_k')
+                                 ),
+                                 box(width=3,solidHeader=TRUE,status="primary",title="SPREC: M (>48h)",
+                                     DT::dataTableOutput('pb_table_pre_m')
+                                 )
+                               )
+                      ),
+                      tabPanel(title="Plots",
+                               div(style="height:1000px",plotlyOutput(width="60%", height="1000px","pb_lollis_pre"))
+
+                      )
+                    )
+                  )
+
+                  ),
+          tabItem(tabName="blood_data_post",
+                  fluidRow(
+                    column(width=3,
+                           box(width=10, title="post-Centrifugation Input",solidHeader=TRUE, status="primary",
                                numericInput("pb_plots_post_percent","Enter threshhold (%)",value=30),
                                numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
                            )
                     ),
-                    ),
-                        fluidRow(
-                          column(width=6,
-                            box(width=12,title="Pre-Centrifugation",solidHeader=TRUE,status="primary",
-                                div(style="height:1000px",plotlyOutput(width="100%", height="1000px","pb_lollis_pre"))
-                            )
-                          ),
-                          column(width=6,
-                                 box(width=12,title="Post-Centrifugation",solidHeader=TRUE,status="primary",
-                                     div(style="height:1000px",plotlyOutput(width="100%", height="1000px","pb_lollis_post"))
-                                 )
-                          )
-                        )
+                    column(width=3,
+                           box(width=12,title="Info",solidHeader=TRUE,status="danger",
+                               p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
+                               p("The plot cutoff can be used to declutter the lollipop plots"),
+                               p("The table displays the different parameters according to the SPREC caterogies.")
+                           )
+                    )
                   ),
+                  fluidRow(
+                    tabBox(width=12,
+                           tabPanel(title="Table",
+                                    fluidRow(
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: B (<1h) ",
+                                          DT::dataTableOutput('pb_table_post_b')
+                                      ),
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: D (1-2h)",
+                                          DT::dataTableOutput('pb_table_post_d')
+                                      ),
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: F (2-8h)",
+                                          DT::dataTableOutput('pb_table_post_f')
+                                      ),
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: H (8-24h)",
+                                          DT::dataTableOutput('pb_table_post_h')
+                                      )
+                                    ),
+                                    fluidRow(
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: G (24-48h)",
+                                          DT::dataTableOutput('pb_table_post_j')
+                                      ),
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: I (>48h)",
+                                          DT::dataTableOutput('pb_table_post_m')
+                                      ),
+                                    )
+                           ),
+                           tabPanel(title="Plots",
+                                    div(style="height:1000px",plotlyOutput(width="60%", height="1000px","pb_lollis_post"))
+
+                           )
+                    )
+                  )
+
+          ),
 
 
           tabItem(tabName="blood_tables",
@@ -222,7 +302,7 @@ server <- function(input, output) {
       precent_lollis$percent<-precent_lollis$intercept*(pb_plots_pre_percent()/100)
       precent_lollis$limit<-ifelse((precent_lollis$slope < 0), c(precent_lollis$intercept-precent_lollis$percent),c(precent_lollis$intercept+precent_lollis$percent))
       precent_lollis$timepoint<-(precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope
-      precent_lollis<-precent_lollis
+      precent_lollis<-precent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
     })
 
     pb_table_post_lollis<-reactive({
@@ -231,8 +311,76 @@ server <- function(input, output) {
       postcent_lollis$percent<-postcent_lollis$intercept*(pb_plots_post_percent()/100)
       postcent_lollis$limit<-ifelse((postcent_lollis$slope < 0), c(postcent_lollis$intercept-postcent_lollis$percent),c(postcent_lollis$intercept+postcent_lollis$percent))
       postcent_lollis$timepoint<-(postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope
-      postcent_lollis<-postcent_lollis
+      postcent_lollis<-postcent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
+
     })
+
+
+    pb_table_pre_a1<-reactive({
+      precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 0.5)
+      precenta1<-subset(precenta1,select =c(name,Type,timepoint))
+    })
+
+    pb_table_pre_a<-reactive({
+      precenta<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 0.5 & pb_table_pre_lollis()$timepoint <2 )
+      precenta<-subset(precenta,select =c(name,Type,timepoint))
+    })
+    pb_table_pre_c<-reactive({
+      precentc<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 2 & pb_table_pre_lollis()$timepoint <4 )
+      precentc<-subset(precentc,select =c(name,Type,timepoint))
+    })
+    pb_table_pre_e<-reactive({
+      precente<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 4 & pb_table_pre_lollis()$timepoint <8 )
+      precente<-subset(precente,select =c(name,Type,timepoint))
+    })
+
+    pb_table_pre_g<-reactive({
+      precentg<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 8 & pb_table_pre_lollis()$timepoint <12 )
+      precentg<-subset(precentg,select =c(name,Type,timepoint))
+    })
+
+    pb_table_pre_i<-reactive({
+      precenti<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 12 & pb_table_pre_lollis()$timepoint <24 )
+      precenti<-subset(precenti,select =c(name,Type,timepoint))
+    })
+    pb_table_pre_k<-reactive({
+      precentk<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 24 & pb_table_pre_lollis()$timepoint <48 )
+      precentk<-subset(precentk,select =c(name,Type,timepoint))
+    })
+
+    pb_table_pre_m<-reactive({
+      precentm<-subset(pb_table_pre_lollis(),pb_table_pre_lollis()$timepoint >48 )
+      precentm<-subset(precentm,select =c(name,Type,timepoint))
+    })
+
+    pb_table_post_b<-reactive({
+      postcentb<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint < 1)
+      postcentb<-subset(postcentb,select =c(name,Type,timepoint))
+    })
+
+    pb_table_post_d<-reactive({
+      postcentd<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 1 & pb_table_post_lollis()$timepoint <2 )
+      postcentd<-subset(postcentd,select =c(name,Type,timepoint))
+    })
+    pb_table_post_f<-reactive({
+      postcentf<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 2 & pb_table_post_lollis()$timepoint <8 )
+      postcentf<-subset(postcentf,select =c(name,Type,timepoint))
+    })
+    pb_table_post_h<-reactive({
+      postcenth<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 8 & pb_table_post_lollis()$timepoint <24 )
+      postcenth<-subset(postcenth,select =c(name,Type,timepoint))
+    })
+
+    pb_table_post_j<-reactive({
+      postcentj<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 24 & pb_table_post_lollis()$timepoint <48 )
+      postcentj<-subset(postcentj,select =c(name,Type,timepoint))
+    })
+
+    pb_table_post_m<-reactive({
+      postcentm<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 48)
+      postcentm<-subset(postcentm,select =c(name,Type,timepoint))
+    })
+
   #create plot
     pb_plot_pre_lollis<-reactive({
       req(input$pb_plots_pre_cutoff)
@@ -274,6 +422,54 @@ server <- function(input, output) {
      output$pb_lollis_post<-renderPlotly({
        pb_plot_post_lollis()
      })
+
+     #table output
+     output$pb_table_pre_a1<-DT::renderDataTable(
+       pb_table_pre_a1(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_a<-DT::renderDataTable(
+       pb_table_pre_a(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_c<-DT::renderDataTable(
+       pb_table_pre_c(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_e<-DT::renderDataTable(
+       pb_table_pre_e(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_g<-DT::renderDataTable(
+       pb_table_pre_g(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_i<-DT::renderDataTable(
+       pb_table_pre_i(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_k<-DT::renderDataTable(
+       pb_table_pre_k(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_pre_m<-DT::renderDataTable(
+       pb_table_pre_m(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_b<-DT::renderDataTable(
+       pb_table_post_b(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_d<-DT::renderDataTable(
+       pb_table_post_d(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_f<-DT::renderDataTable(
+       pb_table_post_f(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_h<-DT::renderDataTable(
+       pb_table_post_h(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_j<-DT::renderDataTable(
+       pb_table_post_j(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+     output$pb_table_post_m<-DT::renderDataTable(
+       pb_table_post_m(),options=list(autoWidth=TRUE),rownames=FALSE
+     )
+
+     output$pb_lollis_post_table<-DT::renderDataTable(
+       pb_table_post_lollis()
+     )
 
 
 ####Blood Tables
