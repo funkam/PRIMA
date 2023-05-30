@@ -191,10 +191,10 @@ ui <- dashboardPage(
                                       )
                                     ),
                                     fluidRow(
-                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: G (24-48h)",
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: J (24-48h)",
                                           DT::dataTableOutput('pb_table_post_j')
                                       ),
-                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: I (>48h)",
+                                      box(width=3,solidHeader=TRUE,status="primary",title="SPREC: M (>48h)",
                                           DT::dataTableOutput('pb_table_post_m')
                                       ),
                                     )
