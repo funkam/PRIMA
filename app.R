@@ -51,8 +51,8 @@ ui <- dashboardPage(
                   collapsed=FALSE,
                   menuItem("Home", tabName = "home", icon = icon("home"),selected=T),
                   menuItem("Data",tabName="blood_data_plots",icon=icon(("newspaper")),
-                  menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("backward"))),
-                  menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("forward")))
+                  menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("right-to-bracket"))), #alternative arrow-right-to-bracket, and arrow-left-to-bracket, right-from-bracket.left-from-bracket
+                  menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("right-from-bracket")))
                   ),
                   menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")))
 
