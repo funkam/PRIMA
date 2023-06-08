@@ -105,7 +105,7 @@ ui <- dashboardPage(
                   fluidRow(
                     column(width=3,
                       box(width=10, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
-                                  numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=30),
+                                  numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=20),
                                   numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
                         )
                     ),
@@ -161,7 +161,7 @@ ui <- dashboardPage(
                   fluidRow(
                     column(width=3,
                            box(width=10, title="post-Centrifugation Input",solidHeader=TRUE, status="primary",
-                               numericInput("pb_plots_post_percent","Enter threshhold (%)",value=30),
+                               numericInput("pb_plots_post_percent","Enter threshhold (%)",value=20),
                                numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
                            )
                     ),
@@ -223,12 +223,12 @@ ui <- dashboardPage(
                               fluidRow(
                                 column(width=4,
                                        box(width=12,
-                                           numericInput("minor","Minor color %:",value=15),
+                                           numericInput("minor","Minor color %:",value=10),
                                            colourInput("minor_color","Minor Color:",value="orange"))
                                 ),
                                 column(width=4,
                                        box(width=12,
-                                           numericInput("major","Major color %:",value=30),
+                                           numericInput("major","Major color %:",value=20),
                                            colourInput("major_color","Major Color:",value="red")
                                        )
                                 ),
