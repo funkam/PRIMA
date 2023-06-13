@@ -1,4 +1,8 @@
 # NMR QC Tool
+#disclaimer and link to paper for conditions
+
+
+
 
 library(shiny)
 library(shinyWidgets)
@@ -10,6 +14,8 @@ library(ggplot2)
 library(colourpicker)
 library(rmarkdown)
 library(forcats)
+library(tibble)
+library(lubridate)
 
 #data input
 LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)
@@ -43,7 +49,78 @@ calculator<-function(data_pre,data_post,t1,t2){
   final<-setNames(final,c("Metabolite","PreCent","PostCent","Combined"))
 }
 
+calculator_multi<-function(df,data_pre,data_post){
+
+  LM_pre<-data_pre
+  LM_post<-data_post
+  LM_pre_reduced<-data.frame(LM_pre$name,LM_pre$intercept,LM_pre$slope)
+  LM_pre_reduced<-setNames(LM_pre_reduced,c("Metabolite","PreInt","PreSlope"))
+  LM_post_reduced<-data.frame(LM_post$name,LM_post$intercept,LM_post$slope)
+  LM_post_reduced<-setNames(LM_post_reduced,c("Metabolite","PostInt","PostSlope"))
+  LM_combo<-inner_join(LM_pre_reduced,LM_post_reduced,by="Metabolite")
+
+  LM_final<-as.data.frame(cbind(df$ID,df$PreCent,df$PostCent,df$TTF))
+  LM_final<-setNames(LM_final,c("ID","PreCent","PostCent","TTF"))
+
+  LM_combo<-LM_combo %>% column_to_rownames(var="Metabolite")
+
+  temp_data<-data.frame()
+  lm_testy<-data.frame()
+
+  tempy<-list()
+  x2<-list()
+  x3<-list()
+  delta1<-list()
+  delta1_percent<-list()
+  delta2<-list()
+  delta2_percent<-list()
+  combined_percent<-list()
+  all_change<-list()
+  pre_change<-list()
+  post_change<-list()
+
+  #double for loop
+  LM_final<-LM_final %>% column_to_rownames(var="ID")
+
+  for(n in rownames(LM_final)){
+    for(i in rownames(LM_combo)){
+      x2[i]<-as.numeric(LM_final[n,]$PreCent)*LM_combo[i,]$PreSlope+LM_combo[i,]$PreInt
+      x3[i]<-as.numeric(LM_final[n,]$PostCent)*(LM_combo[i,]$PostSlope)+x2[[i]]
+      delta1[i]<-(x2[[i]])-(LM_combo[i,]$PreInt)
+      delta1_percent[i]<-((delta1[[i]]))*100/(LM_combo[i,]$PreInt)
+      delta2[i]<-((x3[[i]])-(x2[[i]]))
+      delta2_percent[i]<-((delta2[[i]]))*100/(x2[[i]])
+      combined_percent[i]<-delta1_percent[[i]]+delta2_percent[[i]]
+    }
+    pre_change[n]<-list(change=delta1_percent)
+    post_change[n]<-list(change=delta2_percent)
+    all_change[n]<-list(change = combined_percent)
+    all_change_dataframe<-as.data.frame(t(do.call(cbind,all_change)))
+    all_change_dataframe<-tibble::rownames_to_column(all_change_dataframe,"ID")
+  }
+  LM_final<-tibble::rownames_to_column(LM_final,"ID")
+  final_df<-inner_join(LM_final,all_change_dataframe,by="ID")
+}
+
+
+date_helper<-function(df){
+  #create time tables from csv using lubridate
+  df$Centrifugation<-as.POSIXct(df$Centrifugation,format="%d.%m.%Y %H:%M")
+  df$Freeze<-as.POSIXct(df$Freeze,format="%d.%m.%Y %H:%M")
+  df$Draw<-as.POSIXct(df$Draw,format="%d.%m.%Y %H:%M")
+  df$PreCent<-as.numeric(difftime(df$Centrifugation,df$Draw),units="hours")
+  df$PostCent<-as.numeric(difftime(df$Freeze,df$Centrifugation),units="hours")
+  df$TTF<-as.numeric(difftime(df$Freeze,df$Draw),units="hours")
+  df<-df
+}
+
+
+
 # UI ----------------------------------------------------------------------
+
+# Menu --------------------------------------------------------------------
+
+
 ui <- dashboardPage(
     dashboardHeader(title="NMR QC"),
     dashboardSidebar(
@@ -51,13 +128,23 @@ ui <- dashboardPage(
                   collapsed=FALSE,
                   menuItem("Home", tabName = "home", icon = icon("home"),selected=T),
                   menuItem("Data",tabName="blood_data_plots",icon=icon(("newspaper")),
-                  menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("right-to-bracket"))), #alternative arrow-right-to-bracket, and arrow-left-to-bracket, right-from-bracket.left-from-bracket
-                  menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("right-from-bracket")))
+                    menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("right-to-bracket"))), #alternative arrow-right-to-bracket, and arrow-left-to-bracket, right-from-bracket.left-from-bracket
+                    menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("right-from-bracket")))
                   ),
-                  menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")))
+                  menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")),
+                    menuSubItem("Single Sample",tabName="blood_tables",icon=icon("folder")),
+                    menuSubItem("Batch",tabName="blood_tables_batch",icon=icon("folder-tree"))
+
+                  ),
+                  menuItem("Tools",icon=icon("toolbox"),
+                           menuSubItem("Batch Table Helper",tabName="blood_tables_helper",icon=icon("clock"))
+                           )
 
       )
     ),
+
+# Home --------------------------------------------------------------------
+
 
     dashboardBody(
       tabItems(
@@ -100,6 +187,9 @@ ui <- dashboardPage(
                         )
                   )
           ),
+
+# Pre ---------------------------------------------------------------------
+
 
           tabItem(tabName="blood_data_pre",
                   fluidRow(
@@ -157,6 +247,11 @@ ui <- dashboardPage(
                   )
 
                   ),
+
+
+# Post --------------------------------------------------------------------
+
+
           tabItem(tabName="blood_data_post",
                   fluidRow(
                     column(width=3,
@@ -207,6 +302,9 @@ ui <- dashboardPage(
                   )
 
           ),
+
+# Single Table ------------------------------------------------------------
+
 
 
           tabItem(tabName="blood_tables",
@@ -268,19 +366,101 @@ ui <- dashboardPage(
                           )
                   )
           ),
-          tabItem(tabName="blood_plots",
-                  sliderInput("input_time_ttz", "Adjust highest pre-centrifugation time shown:",
-                              min=0,
-                              max=24,
-                              value=8,
-                              step=0.1),
-                  sliderInput("input_time_ttf", "Adjust highest pre-centrifugation time shown:",
-                              min=0,
-                              max=24,
-                              value=8,
-                              step=0.1),
-                  plotlyOutput("pre_lolli")
+          # tabItem(tabName="blood_plots",
+          #         sliderInput("input_time_ttz", "Adjust highest pre-centrifugation time shown:",
+          #                     min=0,
+          #                     max=24,
+          #                     value=8,
+          #                     step=0.1),
+          #         sliderInput("input_time_ttf", "Adjust highest pre-centrifugation time shown:",
+          #                     min=0,
+          #                     max=24,
+          #                     value=8,
+          #                     step=0.1),
+          #         plotlyOutput("pre_lolli")
+          #         ),
+
+
+
+
+# Batch Tables ------------------------------------------------------------
+
+
+          tabItem(tabName="blood_tables_batch",
+                  fluidRow(
+                    box(width=4,title="Sample Type",solidHeader=TRUE,status="primary",
+                        fluidRow(
+
+                      column(
+                        width=6,align="center",
+                        radioGroupButtons("batch_sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
+                      ),
+                      column(
+                        width=6,
+                        fileInput("batch_file", "File input", multiple=FALSE),
+                        )
+                      ),
+                        p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper"),
+                    ),
+                    box(
+                      width=4,title="Style",solidHeader=TRUE,status="primary",
+                      fluidRow(
+                        column(width=4,
+                               box(width=12,
+                                   numericInput("b_minor","Minor color %:",value=10),
+                                   colourInput("b_minor_color","Minor Color:",value="orange"))
+                        ),
+                        column(width=4,
+                               box(width=12,
+                                   numericInput("b_major","Major color %:",value=20),
+                                   colourInput("b_major_color","Major Color:",value="red")
+                               )
+                        ),
+                        column(width=4,
+                               box(width=12,
+                                   colourInput("b_neutral_color","Neutral Color:",value="")
+                               )
+                        )
+                      )
+                    ),
+                    box(
+                      width=3,title="Download Output",solidHeader=TRUE,status="primary",
+                      p("Download a report as interactive HTML file.",align="justify"),
+                      downloadButton("batch_report", "Generate HTML report")
+                    )
+                  ),
+                  fluidRow(
+                    box(width=12,title="Output",solidHeader=TRUE,status="primary",
+                        DT::dataTableOutput('batch_datatable')
+                    )
                   )
+          ),
+
+
+# Tools -------------------------------------------------------------------
+
+          tabItem(tabName="blood_tables_helper",
+                  fluidRow(
+                  box(
+                    width=2,title="Sample File",solidHeader=TRUE,status="primary",
+                    fileInput("helper_file", "File input", multiple=FALSE),
+                  ),
+                  box(
+                    p("This tool converts time stamp entries in the format of d.m.Y H:M to a format recognized by R"),
+                    p("It then calclualted pre-centrifugation, post-centrifugation and total time-to-freeze to be used by the bath processor"),
+                    p("Currently it requires the following columnnames: ID, Draw, Centrifugation, Freeze"),
+                    p("An example table is included on the GitHub page.")
+                  ),
+                  box(width=2,title="Download",solidHeader=TRUE,status="primary",
+                      downloadButton("download_helper", "Download Template")
+                  )
+                  ),
+                  fluidRow(
+                    box(title="Output",solidHeader=TRUE,status="primary",
+                    DT::dataTableOutput('helper_datatable')
+                    )
+                  )
+          )
       )
     )
 )
@@ -288,9 +468,11 @@ ui <- dashboardPage(
 # Server ------------------------------------------------------------------
 server <- function(input, output) {
 
-####Blood PLots
-    pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
+  # Tables ------------------------------------------------------------------
+  pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
     pb_plots_pre_cutoff<-reactive({input$pb_plots_pre_cutoff})
+
+
 
     pb_plots_post_percent<-reactive({input$pb_plots_post_percent})
     pb_plots_post_cutoff<-reactive({input$pb_plots_post_cutoff})
@@ -472,8 +654,8 @@ server <- function(input, output) {
      )
 
 
-####Blood Tables
-  pre<-reactive({input$TTZ})
+     # Reports single ----------------------------------------------------------
+     pre<-reactive({input$TTZ})
   post<-reactive({input$TTF})
   type<-reactive({switch(input$sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
   major<-reactive({input$major})
@@ -481,6 +663,8 @@ server <- function(input, output) {
   major_color<-reactive({input$major_color})
   minor_color<-reactive({input$minor_color})
   neutral_color<-reactive({input$neutral_color})
+
+
 
 #filter data
   data_pre<-reactive({
@@ -563,7 +747,161 @@ server <- function(input, output) {
       file.rename(out,file)
     }
   )
+
+
+  # Batch -------------------------------------------------------------------
+  batch_file <- reactive({
+    inFile1<-input$batch_file
+    if (is.null(inFile1)) {
+      return("")
+    }
+    # actually read the file
+    read.csv(file = inFile1$datapath)
+  })
+
+  b_type<-reactive({switch(input$batch_sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
+  b_major<-reactive({input$b_major})
+  b_minor<-reactive({input$b_minor})
+  b_major_color<-reactive({input$b_major_color})
+  b_minor_color<-reactive({input$b_minor_color})
+  b_neutral_color<-reactive({input$b_neutral_color})
+
+  b_data_pre<-reactive({
+    b_type<-b_type()
+    if(b_type=="Serum"){
+      df<-LM_pre %>% filter(Type=="Serum")
+    } else if(b_type=="EDTA"){
+      df<-LM_pre %>% filter(Type=="EDTA")
+    } else if(b_type=="LiHep"){
+      df<-LM_pre %>% filter(Type=="LiHep")
+    }
+  })
+  #filter data
+  b_data_post<-reactive({
+    b_type<-b_type()
+    if(b_type=="Serum"){
+      df<-LM_post %>% filter(Type=="Serum")
+    } else if(b_type=="EDTA"){
+      df<-LM_post %>% filter(Type=="EDTA")
+    } else if(b_type=="LiHep"){
+      df<-LM_post %>% filter(Type=="LiHep")
+    }
+  })
+
+  batch_creation<-reactive({
+    req(input$batch_file)
+    b_final<-calculator_multi(batch_file(),b_data_pre(),b_data_post())
+    color_changes<-c(-b_major(),-b_minor(),b_minor(),b_major())
+    colors<-c(b_major_color(),b_minor_color(),b_neutral_color(),b_minor_color(),b_major_color())
+    columns<-colnames(b_final[5:ncol(b_final)])
+    b_final<-datatable(b_final,columns,
+                     extensions = 'Buttons',
+                     options = list(dom = 'lfrtpB',
+                                    scrollX=TRUE,
+                                    buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                                    lengthMenu = list(c(25, 100, -1), c('10','25','100', 'All')),
+                                    pageLength=10
+                     )
+    )  %>%
+      formatStyle(columns,  backgroundColor = styleInterval(color_changes,colors),
+                  fontWeight = 'bold') %>%
+      formatRound(columns,digits=2)
+  })
+
+
+  output$batch_datatable<-renderDataTable({
+    batch_creation()
+  })
+
+  #filter data
+
+
+  output$batcher<-renderDataTable({
+    b_data_pre()
+  })
+
+
+  output$batch_report <- downloadHandler(
+    filename = "QC_Report.html",
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      file.copy("report.Rmd", tempReport, overwrite = TRUE)
+
+      # Set up parameters to pass to Rmd document
+      params <- list(
+        table=batch_creation(),
+        major=input$major,
+        minor=input$minor
+      )
+
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      out<-rmarkdown::render(
+        tempReport,
+        params = params,
+        envir = new.env(parent = globalenv())
+      )
+      file.rename(out,file)
+    }
+  )
+
+
+
+
+  # Tools -------------------------------------------------------------------
+  helper_creation<-reactive({
+    req(input$helper_file)
+    date_helper(helper_file())
+  })
+
+
+
+  helper_file <- reactive({
+    inFile<-input$helper_file
+    if (is.null(inFile)) {
+      return("")
+    }
+    # actually read the file
+    read.csv(file = inFile$datapath)
+    })
+
+
+  output$helper_datatable<-renderDataTable({
+    helper_creation()
+  })
+  output$helper<-renderDataTable({
+    helper_file()
+  })
+
+  output$download_helper <- shiny::downloadHandler(
+    filename = function() {
+      paste("_dated", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(helper_creation(), file, row.names = FALSE)
+    }
+
+  )
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
 
 # Run the application
 shinyApp(ui = ui, server = server)
