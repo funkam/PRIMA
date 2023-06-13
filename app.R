@@ -134,12 +134,10 @@ ui <- dashboardPage(
                   menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")),
                     menuSubItem("Single Sample",tabName="blood_tables",icon=icon("folder")),
                     menuSubItem("Batch",tabName="blood_tables_batch",icon=icon("folder-tree"))
-
                   ),
                   menuItem("Tools",icon=icon("toolbox"),
-                           menuSubItem("Batch Table Helper",tabName="blood_tables_helper",icon=icon("clock"))
+                           menuSubItem("Times Calculator",tabName="blood_tables_helper",icon=icon("clock"))
                            )
-
       )
     ),
 
@@ -147,6 +145,61 @@ ui <- dashboardPage(
 
 
     dashboardBody(
+
+      tags$head(tags$style(HTML('
+            /* logo */
+        .skin-blue .main-header .logo {
+                              background-color: #001787;
+                              color:#c4ff00;
+         /* logo when hovered */
+        .skin-blue .main-header .logo:hover {
+                              background-color: #8d89ad;
+                              }
+                              }
+        /* navbar (rest of the header) */
+        .skin-blue .main-header .navbar {
+                              background-color: #001787;
+                              color:#c4ff00;
+        }
+        .skin-blue .main-header .sidebar-toffle {
+                              background-color: #001787;
+                              color:#c4ff00;
+                              }
+
+        /* main sidebar */
+        .skin-blue .main-sidebar {
+                              background-color: #001787;
+                              color:#c4ff00;
+        }
+        /* active selected tab in the sidebarmenu */
+        .skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+                              background-color: #001787;
+                              color:#c4ff00;
+                              }
+        /* other links in the sidebarmenu */
+        .skin-blue .main-sidebar .sidebar .sidebar-menu a{
+                              background-color: #001787;
+                              color: #ffffff;
+        }
+        /* other links in the sidebarmenu when hovered */
+         .skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
+                              background-color: #8d89ad;
+         }
+        /* toggle button when hovered  */
+         .skin-blue .main-header .navbar .sidebar-toggle{
+                              color:#c4ff00;
+                              }
+        /* toggle button when hovered  */
+         .skin-blue .box.box-solid.box-primary>.box-header {
+                              background-color: #001787;
+                              color:#c4ff00;
+         }
+        '))),
+
+
+
+
+
       tabItems(
           tabItem(tabName="home",
                   fluidRow(
@@ -161,6 +214,8 @@ ui <- dashboardPage(
                      box(width=2,title="Links",solidHeader=TRUE,status="primary",
                              p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
                              p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
+                             p(a("Publication",href="")),
+
                              #p(a("Publication",href=""))
                              )
                       ),
@@ -172,18 +227,23 @@ ui <- dashboardPage(
 
                   fluidRow(
                     box(title="Description",solidHeader=TRUE,status="primary",
-                      p("Linear mixes models were created to show the change of multiple metabolites over time."),
-                      p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
-                      p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time."),
-                      p("The Panel is split into producing plots, as well as color-coded tables.")
+                        p("Linear mixes models were created to show the change of multiple metabolites over time."),
+                        p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
+                        p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time."),
+                        p("The Panel is split into producing plots, as well as color-coded tables.")
                     )
                   ),
                   fluidRow(
-                    box(title="Plots",solidHeader=TRUE,status="primary",
-                        p("In the 'Plots' tab the user can enter a percentage limit for metabolite change (default 30%), as well as a end time point for the plot (in hours).",br(),br(),"Lollipop plots are then generated dynamically with the given input, giving an overview of the different metabolites and the calucalted time for the given change",br(),br(),"Datapoints are shown for each of the different coagulation tubes.")
+                    box(title="Data",solidHeader=TRUE,status="primary",
+                        p("The Data tab shows different ways of highlighting the different stability time-points in minutes. The time-points are sorted according to their SPREC classification. In addition, there is an alternative way of presenting the date in form of lollipop plots."),
+                        p("The data is split according the two different delays (pre- and post-centrifugation")
                         ),
-                    box(title="Tables",solidHeader=TRUE,status="primary",
-                        p("The 'Tables' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a Slider.",br(),br(),"A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe",br(),br(),"The colors, as well as the % threshholds, can be adjusted.",br(),br(),"The table can be downloaded as a .HTML report or the table directly as .csv (or other formats).")
+                    box(title="QC-Panel",solidHeader=TRUE,status="primary",
+                        p("The 'Single' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a Slider. A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe. The colors, as well as the % threshholds, can be adjusted. The table can be downloaded as a .HTML report or the table directly as .csv (or other formats)."),
+                        p("The batch tab allows the same procedure but with an uploaded table with pre- and post-centrifugation times to allow batch processing")
+                        ),
+                    box(title="Tools",solidHeader=TRUE,status="primary",
+                        p("An additional tab for Tools is available. Currently it consists of a tool for calculating the pre- and post-centrifugation times from the differences of date+time stamps. However a specific format is needed. See examples.")
                         )
                   )
           ),
@@ -196,11 +256,11 @@ ui <- dashboardPage(
                     column(width=3,
                       box(width=10, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
                                   numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=20),
-                                  numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
+                                  numericInput("pb_plots_pre_cutoff","Enter plot cutoff (min)",value=480)
                         )
                     ),
                     column(width=3,
-                        box(width=12,title="Info",solidHeader=TRUE,status="danger",
+                        box(width=12,title="Info",solidHeader=TRUE,status="primary",
                             p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
                             p("The plot cutoff can be used to declutter the lollipop plots"),
                             p("The table displays the different parameters according to the SPREC caterogies.")
@@ -257,11 +317,11 @@ ui <- dashboardPage(
                     column(width=3,
                            box(width=10, title="post-Centrifugation Input",solidHeader=TRUE, status="primary",
                                numericInput("pb_plots_post_percent","Enter threshhold (%)",value=20),
-                               numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
+                               numericInput("pb_plots_post_cutoff","Enter plot cutoff (min)",value=480)
                            )
                     ),
                     column(width=3,
-                           box(width=12,title="Info",solidHeader=TRUE,status="danger",
+                           box(width=12,title="Info",solidHeader=TRUE,status="primary",
                                p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
                                p("The plot cutoff can be used to declutter the lollipop plots"),
                                p("The table displays the different parameters according to the SPREC caterogies.")
@@ -384,8 +444,6 @@ ui <- dashboardPage(
 
 
 # Batch Tables ------------------------------------------------------------
-
-
           tabItem(tabName="blood_tables_batch",
                   fluidRow(
                     box(width=4,title="Sample Type",solidHeader=TRUE,status="primary",
@@ -457,6 +515,7 @@ ui <- dashboardPage(
                   ),
                   fluidRow(
                     box(title="Output",solidHeader=TRUE,status="primary",
+                        width=12,
                     DT::dataTableOutput('helper_datatable')
                     )
                   )
@@ -469,11 +528,8 @@ ui <- dashboardPage(
 server <- function(input, output) {
 
   # Tables ------------------------------------------------------------------
-  pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
+    pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
     pb_plots_pre_cutoff<-reactive({input$pb_plots_pre_cutoff})
-
-
-
     pb_plots_post_percent<-reactive({input$pb_plots_post_percent})
     pb_plots_post_cutoff<-reactive({input$pb_plots_post_cutoff})
 
@@ -483,7 +539,7 @@ server <- function(input, output) {
       precent_lollis<-LM_pre
       precent_lollis$percent<-precent_lollis$intercept*(pb_plots_pre_percent()/100)
       precent_lollis$limit<-ifelse((precent_lollis$slope < 0), c(precent_lollis$intercept-precent_lollis$percent),c(precent_lollis$intercept+precent_lollis$percent))
-      precent_lollis$timepoint<-(precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope
+      precent_lollis$timepoint<-((precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope)*60
       precent_lollis<-precent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
     })
 
@@ -492,74 +548,74 @@ server <- function(input, output) {
       postcent_lollis<-LM_post
       postcent_lollis$percent<-postcent_lollis$intercept*(pb_plots_post_percent()/100)
       postcent_lollis$limit<-ifelse((postcent_lollis$slope < 0), c(postcent_lollis$intercept-postcent_lollis$percent),c(postcent_lollis$intercept+postcent_lollis$percent))
-      postcent_lollis$timepoint<-(postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope
+      postcent_lollis$timepoint<-((postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope)*60
       postcent_lollis<-postcent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
 
     })
 
 
     pb_table_pre_a1<-reactive({
-      precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 0.5)
+      precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 30)
       precenta1<-subset(precenta1,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_a<-reactive({
-      precenta<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 0.5 & pb_table_pre_lollis()$timepoint <2 )
+      precenta<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 30 & pb_table_pre_lollis()$timepoint <120 )
       precenta<-subset(precenta,select =c(name,Type,timepoint))
     })
     pb_table_pre_c<-reactive({
-      precentc<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 2 & pb_table_pre_lollis()$timepoint <4 )
+      precentc<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 120 & pb_table_pre_lollis()$timepoint <240 )
       precentc<-subset(precentc,select =c(name,Type,timepoint))
     })
     pb_table_pre_e<-reactive({
-      precente<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 4 & pb_table_pre_lollis()$timepoint <8 )
+      precente<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 240 & pb_table_pre_lollis()$timepoint <480 )
       precente<-subset(precente,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_g<-reactive({
-      precentg<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 8 & pb_table_pre_lollis()$timepoint <12 )
+      precentg<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 480 & pb_table_pre_lollis()$timepoint <720 )
       precentg<-subset(precentg,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_i<-reactive({
-      precenti<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 12 & pb_table_pre_lollis()$timepoint <24 )
+      precenti<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 720 & pb_table_pre_lollis()$timepoint <1440 )
       precenti<-subset(precenti,select =c(name,Type,timepoint))
     })
     pb_table_pre_k<-reactive({
-      precentk<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 24 & pb_table_pre_lollis()$timepoint <48 )
+      precentk<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 1440 & pb_table_pre_lollis()$timepoint <2880 )
       precentk<-subset(precentk,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_m<-reactive({
-      precentm<-subset(pb_table_pre_lollis(),pb_table_pre_lollis()$timepoint >48 )
+      precentm<-subset(pb_table_pre_lollis(),pb_table_pre_lollis()$timepoint >2880 )
       precentm<-subset(precentm,select =c(name,Type,timepoint))
     })
 
     pb_table_post_b<-reactive({
-      postcentb<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint < 1)
+      postcentb<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint < 60)
       postcentb<-subset(postcentb,select =c(name,Type,timepoint))
     })
 
     pb_table_post_d<-reactive({
-      postcentd<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 1 & pb_table_post_lollis()$timepoint <2 )
+      postcentd<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 60 & pb_table_post_lollis()$timepoint <120 )
       postcentd<-subset(postcentd,select =c(name,Type,timepoint))
     })
     pb_table_post_f<-reactive({
-      postcentf<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 2 & pb_table_post_lollis()$timepoint <8 )
+      postcentf<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 240 & pb_table_post_lollis()$timepoint <480 )
       postcentf<-subset(postcentf,select =c(name,Type,timepoint))
     })
     pb_table_post_h<-reactive({
-      postcenth<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 8 & pb_table_post_lollis()$timepoint <24 )
+      postcenth<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 480 & pb_table_post_lollis()$timepoint <1440 )
       postcenth<-subset(postcenth,select =c(name,Type,timepoint))
     })
 
     pb_table_post_j<-reactive({
-      postcentj<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 24 & pb_table_post_lollis()$timepoint <48 )
+      postcentj<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 1440 & pb_table_post_lollis()$timepoint <2880 )
       postcentj<-subset(postcentj,select =c(name,Type,timepoint))
     })
 
     pb_table_post_m<-reactive({
-      postcentm<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 48)
+      postcentm<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 2880)
       postcentm<-subset(postcentm,select =c(name,Type,timepoint))
     })
 
@@ -572,9 +628,9 @@ server <- function(input, output) {
       pre_lollis_plot<-ggplot(precent_lollis,aes(x=name,y=timepoint,color=Type))+
         geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
         geom_point(aes(fill=Type,size=2,shape=Type)) +
-        scale_y_continuous(breaks = round(seq(0, max(precent_lollis$timepoint), by = 2),1)) +
+        #scale_y_continuous(breaks = round(seq(0, max(precent_lollis$timepoint), by = ),1)) +
         xlab("")+
-        ylab("Stability / hours")+
+        ylab("Stability / minutes")+
         theme_minimal()+
         theme(legend.position="blank")+
         coord_flip()
@@ -588,9 +644,9 @@ server <- function(input, output) {
       post_lollis_plot<-ggplot(postcent_lollis,aes(x=name,y=timepoint,color=Type))+
         geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
         geom_point(aes(fill=Type,size=2,shape=Type)) +
-        scale_y_continuous(breaks = round(seq(0, max(postcent_lollis$timepoint), by = 2),1)) +
+        #scale_y_continuous(breaks = round(seq(0, max(postcent_lollis$timepoint), by = 2),1)) +
         xlab("")+
-        ylab("Stability / hours")+
+        ylab("Stability / minutes")+
         theme_minimal()+
         theme(legend.position="blank")+
         coord_flip()
