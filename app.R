@@ -136,7 +136,7 @@ ui <- dashboardPage(
                     menuSubItem("Batch",tabName="blood_tables_batch",icon=icon("folder-tree"))
                   ),
                   menuItem("Tools",icon=icon("toolbox"),
-                           menuSubItem("Times Calculator",tabName="blood_tables_helper",icon=icon("clock"))
+                           menuSubItem("Delay Calculator",tabName="blood_tables_helper",icon=icon("clock"))
                            )
       )
     ),
@@ -539,7 +539,7 @@ server <- function(input, output) {
       precent_lollis<-LM_pre
       precent_lollis$percent<-precent_lollis$intercept*(pb_plots_pre_percent()/100)
       precent_lollis$limit<-ifelse((precent_lollis$slope < 0), c(precent_lollis$intercept-precent_lollis$percent),c(precent_lollis$intercept+precent_lollis$percent))
-      precent_lollis$timepoint<-((precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope)*60
+      precent_lollis$timepoint<-((precent_lollis$limit-precent_lollis$intercept)/precent_lollis$slope)
       precent_lollis<-precent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
     })
 
@@ -548,74 +548,74 @@ server <- function(input, output) {
       postcent_lollis<-LM_post
       postcent_lollis$percent<-postcent_lollis$intercept*(pb_plots_post_percent()/100)
       postcent_lollis$limit<-ifelse((postcent_lollis$slope < 0), c(postcent_lollis$intercept-postcent_lollis$percent),c(postcent_lollis$intercept+postcent_lollis$percent))
-      postcent_lollis$timepoint<-((postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope)*60
+      postcent_lollis$timepoint<-((postcent_lollis$limit-postcent_lollis$intercept)/postcent_lollis$slope)
       postcent_lollis<-postcent_lollis %>% mutate(across(where(is.numeric), round, digits=2))
 
     })
 
 
     pb_table_pre_a1<-reactive({
-      precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 30)
+      precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 0.5)
       precenta1<-subset(precenta1,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_a<-reactive({
-      precenta<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 30 & pb_table_pre_lollis()$timepoint <120 )
+      precenta<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 0.5  & pb_table_pre_lollis()$timepoint <2 )
       precenta<-subset(precenta,select =c(name,Type,timepoint))
     })
     pb_table_pre_c<-reactive({
-      precentc<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 120 & pb_table_pre_lollis()$timepoint <240 )
+      precentc<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 2 & pb_table_pre_lollis()$timepoint <4 )
       precentc<-subset(precentc,select =c(name,Type,timepoint))
     })
     pb_table_pre_e<-reactive({
-      precente<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 240 & pb_table_pre_lollis()$timepoint <480 )
+      precente<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 4 & pb_table_pre_lollis()$timepoint <8 )
       precente<-subset(precente,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_g<-reactive({
-      precentg<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 480 & pb_table_pre_lollis()$timepoint <720 )
+      precentg<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 8 & pb_table_pre_lollis()$timepoint <12 )
       precentg<-subset(precentg,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_i<-reactive({
-      precenti<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 720 & pb_table_pre_lollis()$timepoint <1440 )
+      precenti<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 12 & pb_table_pre_lollis()$timepoint <24 )
       precenti<-subset(precenti,select =c(name,Type,timepoint))
     })
     pb_table_pre_k<-reactive({
-      precentk<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 1440 & pb_table_pre_lollis()$timepoint <2880 )
+      precentk<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint >= 24 & pb_table_pre_lollis()$timepoint <48 )
       precentk<-subset(precentk,select =c(name,Type,timepoint))
     })
 
     pb_table_pre_m<-reactive({
-      precentm<-subset(pb_table_pre_lollis(),pb_table_pre_lollis()$timepoint >2880 )
+      precentm<-subset(pb_table_pre_lollis(),pb_table_pre_lollis()$timepoint >48 )
       precentm<-subset(precentm,select =c(name,Type,timepoint))
     })
 
     pb_table_post_b<-reactive({
-      postcentb<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint < 60)
+      postcentb<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint < 1)
       postcentb<-subset(postcentb,select =c(name,Type,timepoint))
     })
 
     pb_table_post_d<-reactive({
-      postcentd<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 60 & pb_table_post_lollis()$timepoint <120 )
+      postcentd<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 1 & pb_table_post_lollis()$timepoint <2 )
       postcentd<-subset(postcentd,select =c(name,Type,timepoint))
     })
     pb_table_post_f<-reactive({
-      postcentf<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 240 & pb_table_post_lollis()$timepoint <480 )
+      postcentf<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 2 & pb_table_post_lollis()$timepoint <8 )
       postcentf<-subset(postcentf,select =c(name,Type,timepoint))
     })
     pb_table_post_h<-reactive({
-      postcenth<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 480 & pb_table_post_lollis()$timepoint <1440 )
+      postcenth<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 8 & pb_table_post_lollis()$timepoint <24 )
       postcenth<-subset(postcenth,select =c(name,Type,timepoint))
     })
 
     pb_table_post_j<-reactive({
-      postcentj<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 1440 & pb_table_post_lollis()$timepoint <2880 )
+      postcentj<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 24 & pb_table_post_lollis()$timepoint <48 )
       postcentj<-subset(postcentj,select =c(name,Type,timepoint))
     })
 
     pb_table_post_m<-reactive({
-      postcentm<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 2880)
+      postcentm<-subset(pb_table_post_lollis(), pb_table_post_lollis()$timepoint >= 48)
       postcentm<-subset(postcentm,select =c(name,Type,timepoint))
     })
 
