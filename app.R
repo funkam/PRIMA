@@ -16,6 +16,7 @@ library(rmarkdown)
 library(forcats)
 library(tibble)
 library(lubridate)
+library(ggrepel)
 
 #data input
 LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)
@@ -256,7 +257,7 @@ ui <- dashboardPage(
                     column(width=3,
                       box(width=10, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
                                   numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=20),
-                                  numericInput("pb_plots_pre_cutoff","Enter plot cutoff (min)",value=480)
+                                  numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
                         )
                     ),
                     column(width=3,
@@ -300,7 +301,7 @@ ui <- dashboardPage(
                                )
                       ),
                       tabPanel(title="Plots",
-                               div(style="height:1000px",plotlyOutput(width="60%", height="1000px","pb_lollis_pre"))
+                               div(style="height:1000px",plotlyOutput("pb_lollis_pre"))
 
                       )
                     )
@@ -315,9 +316,9 @@ ui <- dashboardPage(
           tabItem(tabName="blood_data_post",
                   fluidRow(
                     column(width=3,
-                           box(width=10, title="post-Centrifugation Input",solidHeader=TRUE, status="primary",
+                           box(width=10, title="Post-Centrifugation Input",solidHeader=TRUE, status="primary",
                                numericInput("pb_plots_post_percent","Enter threshhold (%)",value=20),
-                               numericInput("pb_plots_post_cutoff","Enter plot cutoff (min)",value=480)
+                               numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
                            )
                     ),
                     column(width=3,
@@ -355,7 +356,7 @@ ui <- dashboardPage(
                                     )
                            ),
                            tabPanel(title="Plots",
-                                    div(style="height:1000px",plotlyOutput(width="60%", height="1000px","pb_lollis_post"))
+                                    div(style="height:1000px",plotlyOutput("pb_lollis_post"))
 
                            )
                     )
@@ -625,15 +626,36 @@ server <- function(input, output) {
       precent_lollis<-pb_table_pre_lollis()
       precent_lollis<-precent_lollis %>% filter(timepoint<pb_plots_pre_cutoff())
       precent_lollis<-precent_lollis %>% mutate(name = fct_reorder(name, timepoint))
-      pre_lollis_plot<-ggplot(precent_lollis,aes(x=name,y=timepoint,color=Type))+
-        geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
-        geom_point(aes(fill=Type,size=2,shape=Type)) +
-        #scale_y_continuous(breaks = round(seq(0, max(precent_lollis$timepoint), by = ),1)) +
+      gg_timeline_pre<-ggplot(precent_lollis,aes(x=timepoint,y=Type,color=name))+
+        geom_vline(xintercept=0.5,alpha=0.2)+
+        geom_vline(xintercept=2,alpha=0.2)+
+        geom_vline(xintercept=4,alpha=0.2)+
+        geom_vline(xintercept=8,alpha=0.2)+
+        # geom_vline(xintercept=12,alpha=0.2)+
+        # geom_vline(xintercept=24,alpha=0.2)+
+        # geom_vline(xintercept=48,alpha=0.2)+
+        geom_hline(yintercept="Serum",alpha=0.6)+
+        geom_hline(yintercept="EDTA",alpha=0.6)+
+        geom_hline(yintercept="LiHep",alpha=0.6)+
+        geom_point(aes(x=timepoint,y=Type),size=6)+
+        geom_label(aes(label=name))+
+        ylab("")+
         xlab("")+
-        ylab("Stability / minutes")+
-        theme_minimal()+
-        theme(legend.position="blank")+
-        coord_flip()
+        theme_classic()+
+        theme(legend.position="blank",
+              axis.text=element_text(size=10))+
+        annotate("text",x=0.13,y=3.3,label="A1",size=6)+
+        annotate("text",x=1.2,y=3.3,label="A",size=6)+
+        annotate("text",x=3,y=3.3,label="C",size=6)+
+        annotate("text",x=6,y=3.3,label="E",size=6)
+        # annotate("text",x=10,y=3.52,label="G",size=6)+
+        # annotate("text",x=18,y=3.52,label="I",size=6)+
+        # annotate("text",x=36,y=3.52,label="K",size=6)
+
+
+
+
+
     })
     #create plot
     pb_plot_post_lollis<-reactive({
@@ -641,15 +663,24 @@ server <- function(input, output) {
       postcent_lollis<-pb_table_post_lollis()
       postcent_lollis<-postcent_lollis %>% filter(timepoint<pb_plots_post_cutoff())
       postcent_lollis<-postcent_lollis %>% mutate(name = fct_reorder(name, timepoint))
-      post_lollis_plot<-ggplot(postcent_lollis,aes(x=name,y=timepoint,color=Type))+
-        geom_segment(aes(x=name,xend=name,y=0,yend=timepoint),color="black")+
-        geom_point(aes(fill=Type,size=2,shape=Type)) +
-        #scale_y_continuous(breaks = round(seq(0, max(postcent_lollis$timepoint), by = 2),1)) +
+      gg_timeline_pre<-ggplot(postcent_lollis,aes(x=timepoint,y=Type,color=name))+
+        geom_vline(xintercept=0.5,alpha=0.2)+
+        geom_vline(xintercept=2,alpha=0.2)+
+        geom_vline(xintercept=4,alpha=0.2)+
+        geom_hline(yintercept="Serum",alpha=0.1)+
+        geom_hline(yintercept="EDTA",alpha=0.1)+
+        geom_hline(yintercept="LiHep",alpha=0.1)+
+        geom_point(aes(x=timepoint,y=Type),size=6)+
+        geom_label(aes(label=name))+
+        ylab("")+
         xlab("")+
-        ylab("Stability / minutes")+
-        theme_minimal()+
-        theme(legend.position="blank")+
-        coord_flip()
+        theme_classic()+
+        theme(legend.position="blank",
+              axis.text=element_text(size=10))+
+        annotate("text",x=0.13,y=3.3,label="A1",size=6)+
+        annotate("text",x=1.2,y=3.3,label="A",size=6)+
+        annotate("text",x=3,y=3.3,label="C",size=6)+
+        annotate("text",x=6,y=3.3,label="E",size=6)
     })
 
   #plot output
