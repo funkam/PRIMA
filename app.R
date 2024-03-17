@@ -21,6 +21,8 @@ library(ggrepel)
 #data input
 LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)
 LM_post<-read.csv("Postcent_LM_all_final.csv",stringsAsFactors = FALSE)
+LM_pre_error<-read.csv("Precent_error_final.csv",stringsAsFactors = FALSE)
+LM_post_error<-read.csv("Postcent_error_final.csv",stringsAsFactors = FALSE)
 
 # Scripts -----------------------------------------------------------------
 #Calculator, calculates the % based on the LME models and using the inputs of pre/post centrifugation times
@@ -378,9 +380,9 @@ ui <- dashboardPage(
                                 )
                           ),
                           box(
-                              width=5,title="Style",solidHeader=TRUE,status="primary",
+                              width=6,title="Style",solidHeader=TRUE,status="primary",
                               fluidRow(
-                                column(width=4,
+                                column(width=3,
                                        box(width=12,
                                            numericInput("minor","Minor color %:",value=10),
                                            colourInput("minor_color","Minor Color:",value="orange"))
@@ -391,21 +393,26 @@ ui <- dashboardPage(
                                            colourInput("major_color","Major Color:",value="red")
                                        )
                                 ),
-                                column(width=4,
+                                column(width=3,
                                        box(width=12,
                                            colourInput("neutral_color","Neutral Color:",value="")
                                        )
                                 )
                               )
                           ),
+                          box(width=2,title="Tolerable Error",solidHeader=TRUE,status="primary",
+                              p("Enter tolerable error in percent"),
+                              numericInput("error","
+                                           Error in %", value=15)),
                           box(
-                            width=3,title="Download Output",solidHeader=TRUE,status="primary",
+                            width=2,title="Download Output",solidHeader=TRUE,status="primary",
                             p("Download a report as interactive HTML file.",align="justify"),
                             downloadButton("report", "Generate HTML report")
-                            )
+                          )
+
                   ),
                   fluidRow(
-                          box(width=10,title="Centrifugation Times",solidHeader=TRUE,status="primary",
+                          box(width=8,title="Centrifugation Times",solidHeader=TRUE,status="primary",
                               sliderInput("TTZ",
                                           "Pre-Centrifugation Time:",
                                           min = 0,
@@ -420,7 +427,23 @@ ui <- dashboardPage(
                                           value = 0,
                                           step=0.1)
                           )
+
                   ),
+                  # fluidRow(
+                  #   box(width=12,
+                  #       DT::dataTableOutput('datatable3')
+                  #   )
+                  #       ),
+                  # fluidRow(
+                  #   box(width=12,
+                  #       DT::dataTableOutput('datatable4')
+                  #   )
+                  # ),
+                  # fluidRow(
+                  #   box(width=12,
+                  #       DT::dataTableOutput('datatable2')
+                  #   )
+                  # ),
                   fluidRow(
                           box(width=12,
                             DT::dataTableOutput('datatable')
@@ -554,7 +577,6 @@ server <- function(input, output) {
 
     })
 
-
     pb_table_pre_a1<-reactive({
       precenta1<-subset(pb_table_pre_lollis(), pb_table_pre_lollis()$timepoint < 0.5)
       precenta1<-subset(precenta1,select =c(name,Type,timepoint))
@@ -651,12 +673,8 @@ server <- function(input, output) {
         # annotate("text",x=10,y=3.52,label="G",size=6)+
         # annotate("text",x=18,y=3.52,label="I",size=6)+
         # annotate("text",x=36,y=3.52,label="K",size=6)
-
-
-
-
-
     })
+
     #create plot
     pb_plot_post_lollis<-reactive({
       req(input$pb_plots_post_cutoff)
@@ -742,8 +760,9 @@ server <- function(input, output) {
 
 
      # Reports single ----------------------------------------------------------
-     pre<-reactive({input$TTZ})
+  pre<-reactive({input$TTZ})
   post<-reactive({input$TTF})
+  error<-reactive({input$error})
   type<-reactive({switch(input$sample_type,"edta"="EDTA","lihep"="LiHep","serum"="Serum")})
   major<-reactive({input$major})
   minor<-reactive({input$minor})
@@ -752,19 +771,81 @@ server <- function(input, output) {
   neutral_color<-reactive({input$neutral_color})
 
 
+ #setup error data filer
+  data_setup_pre_error<-reactive({
+    type<-type()
+    pre<-pre()
+    error<-error()
+    if(type=="Serum"){
+      df<-LM_pre_error %>% filter(Type=="Serum")
+    } else if(type=="EDTA"){
+      df<-LM_pre_error %>% filter(Type=="EDTA")
+    } else if(type=="LiHep"){
+      df<-LM_pre_error %>% filter(Type=="LiHep")
+    }
+    if(pre<=2){
+        df<- df %>% filter(Time==2)
+    } else if(pre>2 & pre<=4){
+        df<- df %>% filter(Time==4)
+    } else if(pre>4 & pre<=6){
+        df<- df %>% filter(Time==6)
+    } else if (pre>6){
+        df<- df %>% filter(Time==8)
+    }
+    df$percent<-abs(df$percent)
+    df<-df %>% filter(percent<error)
+    names(df)[names(df) =="ID"]<-"name"
+    df<-subset(df,select=name)
+      })
 
-#filter data
+  data_setup_post_error<-reactive({
+    type<-type()
+    post<-post()
+    error<-error()
+    if(type=="Serum"){
+      df<-LM_post_error %>% filter(Type=="Serum")
+    } else if(type=="EDTA"){
+      df<-LM_post_error %>% filter(Type=="EDTA")
+    } else if(type=="LiHep"){
+      df<-LM_post_error %>% filter(Type=="LiHep")
+    }
+    if(post<=2){
+      df<- df %>% filter(Time==2)
+    } else if(post>2 & post<=4){
+      df<- df %>% filter(Time==4)
+    } else if(post>4 & post<=6){
+      df<- df %>% filter(Time==6)
+    } else if (post>6){
+      df<- df %>% filter(Time==8)
+    }
+    df$percent<-abs(df$percent)
+    df<-df %>% filter(percent<error)
+   names(df)[names(df) =="ID"]<-"name"
+   df<-subset(df,select=name)
+
+  })
+
+  #combine_list of pre and post errors
+  data_error<-reactive({
+    df<-full_join(data_setup_pre_error(),data_setup_post_error(),by="name")
+  })
+
+  #filter data
   data_pre<-reactive({
     type<-type()
+    data_error<-data_error()
     if(type=="Serum"){
-    df<-LM_pre %>% filter(Type=="Serum")
+      df<-LM_pre %>% filter(Type=="Serum")
     } else if(type=="EDTA"){
       df<-LM_pre %>% filter(Type=="EDTA")
-      } else if(type=="LiHep"){
-        df<-LM_pre %>% filter(Type=="LiHep")
-        }
+    } else if(type=="LiHep"){
+      df<-LM_pre %>% filter(Type=="LiHep")
+    }
+    #filter according to errors
+    df<-right_join(df,data_error(),by="name")
   })
-#filter data
+
+  #filter data
   data_post<-reactive({
     type<-type()
     if(type=="Serum"){
@@ -774,7 +855,24 @@ server <- function(input, output) {
     } else if(type=="LiHep"){
       df<-LM_post %>% filter(Type=="LiHep")
     }
+    #filter according to errors
+    df<-right_join(df,data_error(),by="name")
+
   })
+
+  # #output data table
+  # output$datatable2<-renderDataTable({
+  #   data_error()
+  # })
+  #
+  # output$datatable3<-renderDataTable({
+  #   data_setup_pre_error()
+  # })
+  # output$datatable4<-renderDataTable({
+  #   data_setup_post_error()
+  # })
+
+
 
 #calculate percentages and create colored table
     calc_reactive<-reactive({
@@ -800,9 +898,9 @@ server <- function(input, output) {
       })
 
 #output data table
-  output$datatable<-renderDataTable({
-    calc_reactive()
-   })
+output$datatable<-renderDataTable({
+  calc_reactive()
+ })
 
 #Download R Markdown html
   output$report <- downloadHandler(
@@ -901,14 +999,11 @@ server <- function(input, output) {
   })
 
   #filter data
-
-
   output$batcher<-renderDataTable({
     b_data_pre()
   })
 
-
-  output$batch_report <- downloadHandler(
+    output$batch_report <- downloadHandler(
     filename = "QC_Report.html",
     content = function(file) {
       # Copy the report file to a temporary directory before processing it, in
@@ -945,8 +1040,6 @@ server <- function(input, output) {
     date_helper(helper_file())
   })
 
-
-
   helper_file <- reactive({
     inFile<-input$helper_file
     if (is.null(inFile)) {
@@ -955,7 +1048,6 @@ server <- function(input, output) {
     # actually read the file
     read.csv(file = inFile$datapath)
     })
-
 
   output$helper_datatable<-renderDataTable({
     helper_creation()
@@ -973,22 +1065,7 @@ server <- function(input, output) {
     }
 
   )
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
 
 # Run the application
 shinyApp(ui = ui, server = server)
