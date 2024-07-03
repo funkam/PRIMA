@@ -106,14 +106,40 @@ calculator_multi<-function(df,data_pre,data_post){
 }
 
 
-date_helper<-function(df){
+date_helper<-function(df,sprec,centtime){
   #create time tables from csv using lubridate
-  df$Centrifugation<-as.POSIXct(df$Centrifugation,format="%d.%m.%Y %H:%M")
-  df$Freeze<-as.POSIXct(df$Freeze,format="%d.%m.%Y %H:%M")
-  df$Draw<-as.POSIXct(df$Draw,format="%d.%m.%Y %H:%M")
+
+  df$Centrifugation<-parse_date_time(df$Centrifugation,order="dmy HM")
+  df$Freeze<-parse_date_time(df$Freeze,order="dmy HM")
+  df$Draw<-parse_date_time(df$Draw,order="dmy HM")
   df$PreCent<-as.numeric(difftime(df$Centrifugation,df$Draw),units="hours")
   df$PostCent<-as.numeric(difftime(df$Freeze,df$Centrifugation),units="hours")
   df$TTF<-as.numeric(difftime(df$Freeze,df$Draw),units="hours")
+  df$PostCent<-df$PostCent-centtime/60
+  if(sprec=="Yes"){
+    df$SPREC_PRE<-ifelse(df$PreCent < 0.5,"A1",
+                       ifelse(df$PreCent < 2, "A",
+                              ifelse(df$PreCent < 4, "C",
+                                     ifelse(df$PreCent < 8, "E",
+                                            ifelse(df$PreCent < 12, "G",
+                                                   ifelse(df$PreCent < 24, "I",
+                                                          ifelse(df$PreCent < 48,"K","M")
+                                                   )
+                                            )
+                                     )
+                              )
+                       )
+   )
+   df$SPREC_POST<-ifelse(df$PostCent < 1,"B",
+                        ifelse(df$PostCent <2, "D",
+                               ifelse(df$PostCent <8,"F",
+                                      ifelse(df$PostCent < 24, "H",
+                                             ifelse(df$PostCent < 48, "J","M")
+                                             )
+                                      )
+                              )
+                        )
+ }
   df<-df
 }
 
@@ -125,7 +151,7 @@ date_helper<-function(df){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title="NMR QC"),
+    dashboardHeader(title="NMR PRIME"),
     dashboardSidebar(
       sidebarMenu(
                   collapsed=FALSE,
@@ -207,7 +233,7 @@ ui <- dashboardPage(
           tabItem(tabName="home",
                   fluidRow(
                     box(width=6,
-                        h1("NMR Metabolomics Quality Control Panel"),
+                        h1("NMR Processing-Delay Investigator for Metabolomics - NMR PRIME"),
                         #h3(HTML("<b>NMR</b>")),
                         p("A tool for investigating the quality and stability of metabolites in peripheral blood."),
                         p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
@@ -512,6 +538,25 @@ ui <- dashboardPage(
                     )
                   ),
                   fluidRow(
+                    box(width=2,title="Tolerable Error",solidHeader=TRUE,status="primary",
+                        p("Enter tolerable error in percent"),
+                        numericInput("b_error","
+                                           Error in %", value=15)),
+                  ),
+                  fluidRow(
+                    box(width=4, title="Pre-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                      plotlyOutput("pre_histo")
+
+                        ),
+                    box(width=4, title="Post-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                        plotlyOutput("post_histo")
+                    ),
+                    box(width=4, title="2D Histogramm",solidHeader=TRUE, status="primary",
+                        plotlyOutput("combo_histo")
+                    )
+
+                  ),
+                  fluidRow(
                     box(width=12,title="Output",solidHeader=TRUE,status="primary",
                         DT::dataTableOutput('batch_datatable')
                     )
@@ -528,7 +573,7 @@ ui <- dashboardPage(
                     fileInput("helper_file", "File input", multiple=FALSE),
                   ),
                   box(
-                    p("This tool converts time stamp entries in the format of d.m.Y H:M to a format recognized by R"),
+                    p("This tool converts time stamp entries in the format of DMY H:M, the delimiter between DMY does not matter. / or : or - will all work"),
                     p("It then calclualted pre-centrifugation, post-centrifugation and total time-to-freeze to be used by the bath processor"),
                     p("Currently it requires the following columnnames: ID, Draw, Centrifugation, Freeze"),
                     p("An example table is included on the GitHub page.")
@@ -536,6 +581,23 @@ ui <- dashboardPage(
                   box(width=2,title="Download",solidHeader=TRUE,status="primary",
                       downloadButton("download_helper", "Download Template")
                   )
+                  ),
+                  fluidRow(
+                    box(width=2,title="SPREC",solidHeader=TRUE,status="primary",
+                    shinyWidgets::radioGroupButtons("sprec","Calculate SPREC?",
+                                                    choices = list("Yes" = "Yes", "No" = "No"),
+                                                    selected = "Yes")
+
+                    ),
+                    box(width=3,title="Centrifugation",solidHeader=TRUE,status="primary",
+                        sliderInput("centtime",
+                                    "Duration of Centrifugation:",
+                                    min = 0,
+                                    max = 20,
+                                    value = 0,
+                                    step=1),
+                        p("If the centrifguation time stamp is from the beginning of the centrifugation, the duration of the centrifugation needs to be subtracted for an accurate post-centrifugation SPREC.")
+                    )
                   ),
                   fluidRow(
                     box(title="Output",solidHeader=TRUE,status="primary",
@@ -950,6 +1012,7 @@ output$datatable<-renderDataTable({
   b_major_color<-reactive({input$b_major_color})
   b_minor_color<-reactive({input$b_minor_color})
   b_neutral_color<-reactive({input$b_neutral_color})
+  b_error<-reactive({input$b_error})
 
   b_data_pre<-reactive({
     b_type<-b_type()
@@ -973,9 +1036,12 @@ output$datatable<-renderDataTable({
     }
   })
 
-  batch_creation<-reactive({
+  batch_combined<-reactive({
     req(input$batch_file)
     b_final<-calculator_multi(batch_file(),b_data_pre(),b_data_post())
+  })
+  batch_creation<-reactive({
+    b_final<-batch_combined()
     color_changes<-c(-b_major(),-b_minor(),b_minor(),b_major())
     colors<-c(b_major_color(),b_minor_color(),b_neutral_color(),b_minor_color(),b_major_color())
     columns<-colnames(b_final[5:ncol(b_final)])
@@ -1002,6 +1068,58 @@ output$datatable<-renderDataTable({
   output$batcher<-renderDataTable({
     b_data_pre()
   })
+
+  pre_histogram<-reactive({
+    req(input$batch_file)
+    data<-batch_file()
+    ggplot(data,aes(x=PreCent,fill=cut(PreCent,50),color=cut(PreCent,50)))+
+      geom_histogram(binwidth = 0.5)+
+      theme_classic()+
+      xlab("Hours")+
+      ylab("")+
+      theme(legend.position = "none",axis.text =element_text(size=16),axis.title=element_text(size=18,face="bold"))+
+      scale_fill_viridis(discrete=TRUE,option="H")+
+      scale_color_viridis(discrete=TRUE,option="H")
+  })
+
+  output$pre_histo<-renderPlotly(
+    pre_histogram()
+  )
+
+  post_histogram<-reactive({
+    req(input$batch_file)
+    data<-batch_file()
+    ggplot(data,aes(x=PostCent,fill=cut(PostCent,50),color=cut(PostCent,50)))+
+      geom_histogram(binwidth = 0.5)+
+      theme_classic()+
+      xlab("Hours")+
+      ylab("")+
+      theme(legend.position = "none",axis.text =element_text(size=16),axis.title=element_text(size=18,face="bold"))+
+      scale_fill_viridis(discrete=TRUE,option="H")+
+      scale_color_viridis(discrete=TRUE,option="H")
+  })
+
+
+  output$post_histo<-renderPlotly(
+    post_histogram()
+  )
+
+  combo_histogram<-reactive({
+    req(input$batch_file)
+    data<-batch_file()
+    ggplot(data,aes(x=PreCent,y=PostCent))+
+      geom_hex(bins=20)+
+      scale_fill_viridis(discrete=FALSE,option="H")+
+      theme_classic()+
+      xlab("Pre-Cent / Hours")+
+      ylab("Post-Cent / Hours")+
+      theme(legend.position="none",axis.text =element_text(size=16),axis.title=element_text(size=18,face="bold"))
+  })
+
+
+  output$combo_histo<-renderPlotly(
+    combo_histogram()
+  )
 
     output$batch_report <- downloadHandler(
     filename = "QC_Report.html",
@@ -1035,9 +1153,13 @@ output$datatable<-renderDataTable({
 
 
   # Tools -------------------------------------------------------------------
-  helper_creation<-reactive({
+    sprec<-reactive({switch(input$sprec, "Yes"="Yes","No"="No")})
+    centtime<-reactive({input$centtime})
+
+
+    helper_creation<-reactive({
     req(input$helper_file)
-    date_helper(helper_file())
+    date_helper(helper_file(),sprec(),centtime())
   })
 
   helper_file <- reactive({
