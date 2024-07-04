@@ -17,6 +17,7 @@ library(forcats)
 library(tibble)
 library(lubridate)
 library(ggrepel)
+library(treemapify)
 
 #data input
 LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)
@@ -496,70 +497,90 @@ ui <- dashboardPage(
 # Batch Tables ------------------------------------------------------------
           tabItem(tabName="blood_tables_batch",
                   fluidRow(
-                    box(width=4,title="Sample Type",solidHeader=TRUE,status="primary",
-                        fluidRow(
+                    column(width=3,
+                           box(width=12,title="Sample Type",solidHeader=TRUE,status="primary",
+                               fluidRow(
 
-                      column(
-                        width=6,align="center",
-                        radioGroupButtons("batch_sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
-                      ),
-                      column(
-                        width=6,
-                        fileInput("batch_file", "File input", multiple=FALSE),
-                        )
-                      ),
-                        p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper"),
-                    ),
-                    box(
-                      width=4,title="Style",solidHeader=TRUE,status="primary",
-                      fluidRow(
-                        column(width=4,
-                               box(width=12,
-                                   numericInput("b_minor","Minor color %:",value=10),
-                                   colourInput("b_minor_color","Minor Color:",value="orange"))
-                        ),
-                        column(width=4,
-                               box(width=12,
-                                   numericInput("b_major","Major color %:",value=20),
-                                   colourInput("b_major_color","Major Color:",value="red")
-                               )
-                        ),
-                        column(width=4,
-                               box(width=12,
-                                   colourInput("b_neutral_color","Neutral Color:",value="")
-                               )
-                        )
-                      )
-                    ),
-                    box(
-                      width=3,title="Download Output",solidHeader=TRUE,status="primary",
-                      p("Download a report as interactive HTML file.",align="justify"),
-                      downloadButton("batch_report", "Generate HTML report")
-                    )
-                  ),
-                  fluidRow(
-                    box(width=2,title="Tolerable Error",solidHeader=TRUE,status="primary",
-                        p("Enter tolerable error in percent"),
-                        numericInput("b_error","
+                                 column(
+                                   width=6,align="center",
+                                   radioGroupButtons("batch_sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
+                                 ),
+                                 column(
+                                   width=6,
+                                   fileInput("batch_file", "File input", multiple=FALSE),
+                                 )
+                               ),
+                               p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper"),
+                           ),
+                           box(
+                             width=12,title="Style",solidHeader=TRUE,status="primary",
+                             fluidRow(
+                               column(width=6,
+                                      box(width=12,
+                                          numericInput("b_minor","Minor color %:",value=10),
+                                          colourInput("b_minor_color","Minor Color:",value="orange")),
+                                      box(width=12,
+                                          colourInput("b_neutral_color","Neutral Color:",value="")
+                                      )
+                               ),
+                               column(width=6,
+                                      box(width=12,
+                                          numericInput("b_major","Major color %:",value=20),
+                                          colourInput("b_major_color","Major Color:",value="red")
+                                      )
+                               ),
+                             )
+                           ),
+                           box(width=6,title="Tolerable Error",solidHeader=TRUE,status="primary",
+                               p("Enter tolerable error in percent"),
+                               numericInput("b_error","
                                            Error in %", value=15)),
-                  ),
-                  fluidRow(
-                    box(width=4, title="Pre-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
-                      plotlyOutput("pre_histo")
+                           box(
+                             width=6,title="Download Output",solidHeader=TRUE,status="primary",
+                             p("Download a report as interactive HTML file.",align="justify"),
+                             downloadButton("batch_report", "Generate Report")
+                           )
 
-                        ),
-                    box(width=4, title="Post-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
-                        plotlyOutput("post_histo")
-                    ),
-                    box(width=4, title="2D Histogramm",solidHeader=TRUE, status="primary",
-                        plotlyOutput("combo_histo")
-                    )
+                           ),
 
+
+
+                    column(width=9,
+                           box(width=4, title="Pre-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                               plotlyOutput("pre_histo")
+
+                           ),
+                           box(width=4, title="Post-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                               plotlyOutput("post_histo")
+                           ),
+                           box(width=4, title="2D Hex Histogramm",solidHeader=TRUE, status="primary",
+                               plotlyOutput("combo_histo")
+                           ),
+                           box(width=4, title="Pre-Centrifugation SPREC Distribution",solidHeader=TRUE, status="primary",
+                               plotOutput("pre_sprec_pie")
+                           ),
+                           box(width=4, title="Post-Centrifugation SPREC Distribution",solidHeader=TRUE, status="primary",
+                               plotOutput("post_sprec_pie")
+                           )
+                           #box(width=4, title="SPREC Distribution",solidHeader=TRUE, status="primary",
+                          #     plotlyOutput("pre_sprec_bar")
+                           #),
+                           #box(width=4, title="SPREC Distribution",solidHeader=TRUE, status="primary",
+                          #     plotlyOutput("post_sprec_bar")
+                           #)
+
+                           )
                   ),
                   fluidRow(
                     box(width=12,title="Output",solidHeader=TRUE,status="primary",
                         DT::dataTableOutput('batch_datatable')
                     )
+                    # box(width=12,title="Output",solidHeader=TRUE,status="primary",
+                    #     DT::dataTableOutput('temp')
+                    # ),
+                    # box(width=12,title="Output",solidHeader=TRUE,status="primary",
+                    #     DT::dataTableOutput('temp2')
+                    # )
                   )
           ),
 
@@ -1121,6 +1142,116 @@ output$datatable<-renderDataTable({
     combo_histogram()
   )
 
+  add_sprec<-reactive({
+    req(input$batch_file)
+    data<-batch_file()
+    data$SPREC_PRE<-ifelse(data$PreCent < 0.5,"A1",
+                           ifelse(data$PreCent < 2, "A",
+                                  ifelse(data$PreCent < 4, "C",
+                                         ifelse(data$PreCent < 8, "E",
+                                                ifelse(data$PreCent < 12, "G",
+                                                       ifelse(data$PreCent < 24, "I",
+                                                              ifelse(data$PreCent < 48,"K","M")
+                                                       )
+                                                )
+                                         )
+                                  )
+                           )
+    )
+    data$SPREC_POST<-ifelse(data$PostCent < 1,"B",
+                            ifelse(data$PostCent <2, "D",
+                                   ifelse(data$PostCent <8,"F",
+                                          ifelse(data$PostCent < 24, "H",
+                                                 ifelse(data$PostCent < 48, "J","M")
+                                          )
+                                   )
+                            )
+    )
+    data<-data
+  })
+
+  pre_sprec_plot_prepper<-reactive({
+    data<-add_sprec()
+    df<-data %>% count(SPREC_PRE)
+    df$SPREC_PRE<-factor(df$SPREC_PRE,levels=c("A1","A","C","E","G","I","K","M"))
+    df<-df
+  })
+
+  post_sprec_plot_prepper<-reactive({
+    data<-add_sprec()
+    df<-data %>% count(SPREC_POST)
+    df$SPREC_POST<-factor(df$SPREC_POST,levels=c("B","D","F","H","M"))
+    df<-df
+  })
+
+  pre_sprec_pie<-reactive({
+    df<-pre_sprec_plot_prepper()
+    ggplot(df,aes(area=n,fill=SPREC_PRE,label=SPREC_PRE))+
+      geom_treemap(color="white")+
+      geom_treemap_text(color="white",place="centre",fontface="bold")+
+      #scale_fill_viridis(discrete=TRUE,option="H")+
+      theme(legend.position = "none")
+
+  })
+
+  pre_sprec_bar<-reactive({
+    df<-pre_sprec_plot_prepper()
+    ggplot(df,aes(x=SPREC_PRE,y=n,fill=SPREC_PRE))+
+      geom_bar(stat="identity")+
+      theme_classic()+
+      theme(legend.position="none",axis.text =element_text(size=16))+
+      scale_fill_viridis(discrete=TRUE,option="C")
+  })
+
+
+  post_sprec_pie<-reactive({
+    df<-post_sprec_plot_prepper()
+    ggplot(df,aes(area=n,fill=SPREC_POST,label=SPREC_POST))+
+      geom_treemap(color="white")+
+      geom_treemap_text(color="white",place="centre",fontface="bold")+
+      #scale_fill_viridis(discrete=TRUE,option="H")+
+      theme(legend.position = "none")
+
+
+  })
+
+  post_sprec_bar<-reactive({
+    df<-post_sprec_plot_prepper()
+    ggplot(df,aes(x=SPREC_POST,y=n,fill=SPREC_POST))+
+      geom_bar(stat="identity")+
+      theme_classic()+
+      xlab("")+
+      ylab("")+
+    theme(legend.position="none",axis.text =element_text(size=16))+
+    scale_fill_viridis(discrete=TRUE,option="C")
+  })
+
+  output$pre_sprec_pie<-renderPlot({
+    pre_sprec_pie()
+  })
+
+  output$pre_sprec_bar<-renderPlotly({
+    pre_sprec_bar()
+  })
+
+  output$post_sprec_pie<-renderPlot({
+    post_sprec_pie()
+  })
+
+  output$post_sprec_bar<-renderPlotly({
+    post_sprec_bar()
+  })
+
+  output$temp<-renderDataTable({
+    pre_sprec_plot_prepper()
+  })
+
+  output$temp2<-renderDataTable({
+    post_sprec_plot_prepper()
+  })
+
+
+
     output$batch_report <- downloadHandler(
     filename = "QC_Report.html",
     content = function(file) {
@@ -1134,7 +1265,18 @@ output$datatable<-renderDataTable({
       params <- list(
         table=batch_creation(),
         major=input$major,
-        minor=input$minor
+        minor=input$minor,
+        pre_histo=pre_histogram(),
+        post_histo=post_histogram(),
+        combo_histo=combo_histogram(),
+        gg_pre_bar=pre_sprec_bar(),
+        gg_post_bar=pre_sprec_bar(),
+        gg_pre_pie=pre_sprec_pie(),
+        gg_post_pie=post_sprec_pie(),
+        pre_sprec=pre_sprec_plot_prepper(),
+        post_sprec=post_sprec_plot_prepper(),
+        error_input=input$b_error
+
       )
 
       # Knit the document, passing in the `params` list, and eval it in a

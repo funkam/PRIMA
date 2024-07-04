@@ -1,5 +1,5 @@
 ---
-title: "QC-Report"
+title: "PRIME-Panel Report"
 date: "`r Sys.Date()`"
 outputl: html_document
 params:
@@ -8,17 +8,87 @@ params:
   table: NA
   minor: NA
   major: NA
+  pre_histo: NA
+  post_histo: NA
+  combo_histo: NA
+  gg_pre_bar: NA 
+  gg_post_bar: NA
+  gg_pre_pie: NA
+  gg_post_pie: NA
+  pre_sprec: NA
+  post_sprec: NA
+  error_input: NA
 ---
-# Selected parameters
-Pre-Centrifugation Time: `r params$TTZ`
 
-Post Centrifugation Time:`r params$TTF`
+``` {r logo, echo=FALSE}
 
-Minor Threshold: `r params$minor`
+htmltools::img(src = knitr::image_uri("C:/Users/funkalexa/Documents/Code/QC-Tool/QC-Tool/logo.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px; width: 200px; height: 200px') # Added width and height as CSS
+```
 
-Major Threshold: `r params$major`
+A PRIME Panel Report has been generated. The report contains information about the pre-analytical composition of the data. It has generated graphs and tables for pre- and post-centrifugation delays. It applied these data to the established parameter models to estimate changes per processing delays for each metabolic parameter.
 
-# Data Table
-``` {r, echo=FALSE}
+<br>
+<br>
+<br>
+
+# Meta Information
+
+The processing delay (pre- and post-) are summarized in the following plots and tables. The SPREC has been calculated from the given processing delays. The plots give an overview of the distribution of processing delays as well as the categorization into the SPREC.
+
+
+### SPREC Distribution Overview
+
+``` {r dt_pre, echo=FALSE, warning=FALSE}
+library(kableExtra)
+kable(params$pre_sprec) %>% kable_styling(full_width = FALSE, position = "float_left")
+kable(params$post_sprec) %>% kable_styling(full_width = FALSE, position = "left")
+
+```
+
+<br>
+
+## Histograms
+Histograms show the distribution over the processing delays for the pre-centrifugation delays (left) and post-centrifugation delays (right).
+
+``` {r histo, echo=FALSE, fig.show="hold",out.width="45%"}
+
+params$pre_histo
+params$post_histo
+
+```
+
+## 2D Hex Distribution
+The 2D hex distribtuion plot combines desnitiy maps for pre-centrifugation as well as post-centrifugation delays to give a combined overview
+
+``` {r hex, echo=FALSE, fig.show="hold",out.width="60%"}
+
+params$combo_histo
+
+```
+
+## Treemap
+The treemaps show the distribution of the samples according to the different SPREC Letters for the pre-centrifugation delays (left) and post-centrifugation delays (right)
+
+``` {r tree, echo=FALSE, fig.show="hold",out.width="50%"}
+
+params$gg_pre_pie
+params$gg_post_pie
+
+```
+
+<br>
+
+# Metabolite Predictions
+
+The metabolite predictions were performed wit the given pre-centrifugation and post-centrifguation delays.
+The input error was considered to filter out parameters with error values above this threshold:
+`r params$error_input`
+
+
+
+## Data Table
+``` {r, echo=FALSE, warning=FALSE}
 params$table
 ```
