@@ -152,7 +152,7 @@ date_helper<-function(df,sprec,centtime){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title="NMR PRIME"),
+    dashboardHeader(title="PRIME Panel"),
     dashboardSidebar(
       sidebarMenu(
                   collapsed=FALSE,
@@ -179,51 +179,66 @@ ui <- dashboardPage(
       tags$head(tags$style(HTML('
             /* logo */
         .skin-blue .main-header .logo {
-                              background-color: #001787;
-                              color:#c4ff00;
+                              background-color: #ffffff;
+                              color:#000000;
+                              border-right: 3px solid #254264;
+
+        }
          /* logo when hovered */
-        .skin-blue .main-header .logo:hover {
-                              background-color: #8d89ad;
-                              }
+        .skin-blue .main-header .logo:hover .sidebar-toggle:hover {
+                              background-color: #000000;
+                              color:#ffffff;
+
                               }
         /* navbar (rest of the header) */
         .skin-blue .main-header .navbar {
-                              background-color: #001787;
-                              color:#c4ff00;
+                              background-color: #ffffff;
+                              color:#000000;
+
         }
-        .skin-blue .main-header .sidebar-toffle {
-                              background-color: #001787;
-                              color:#c4ff00;
+        .skin-blue .main-header .sidebar-toggle {
+                              background-color: #ffffff;
+                              color:#000000;
                               }
 
         /* main sidebar */
         .skin-blue .main-sidebar {
-                              background-color: #001787;
-                              color:#c4ff00;
+                              background-color: #ffffff;
+                              color:#000000;
+                              border-right: 3px solid #254264;
         }
         /* active selected tab in the sidebarmenu */
         .skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
-                              background-color: #001787;
-                              color:#c4ff00;
+                              background-color: #ffffff;
+                              color:#000000;
+                              font-weight:bold;
                               }
         /* other links in the sidebarmenu */
         .skin-blue .main-sidebar .sidebar .sidebar-menu a{
-                              background-color: #001787;
-                              color: #ffffff;
+                              background-color: #ffffff;
+                              color: #000000;
         }
         /* other links in the sidebarmenu when hovered */
          .skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
-                              background-color: #8d89ad;
+                              background-color: #ffffff;
+                              color:#000000;
+                              font-style:italic;
+                              font-weight:bold;
          }
         /* toggle button when hovered  */
          .skin-blue .main-header .navbar .sidebar-toggle{
-                              color:#c4ff00;
+                              color:#000000;
                               }
         /* toggle button when hovered  */
          .skin-blue .box.box-solid.box-primary>.box-header {
-                              background-color: #001787;
-                              color:#c4ff00;
+                              background-color: #ffffff;
+                              color:#000000;
          }
+        /* body */
+        .content-wrapper, .right-side {
+                              background-color: #ffffff;
+        }
+        .box{-webkit-box-shadow: none; -moz-box-shadow: none;box-shadow: none;}
         '))),
 
 
@@ -233,30 +248,33 @@ ui <- dashboardPage(
       tabItems(
           tabItem(tabName="home",
                   fluidRow(
-                    box(width=6,
-                        h1("NMR Processing-Delay Investigator for Metabolomics - NMR PRIME"),
-                        #h3(HTML("<b>NMR</b>")),
-                        p("A tool for investigating the quality and stability of metabolites in peripheral blood."),
-                        p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
-                        p("Institute for Clinical Chemistry and Laboratory Medicine"),
-                        p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
+                    box(width=12,
+
+                        br(),h1(HTML("<b>PRIME</b> Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR based <b>Me</b>tabolomics")),br(),br(),
+                        fluidRow(
+                          box(title=HTML("<b>Author</b>"), status="primary",width=4,
+                            p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
+                            p("Institute for Clinical Chemistry and Laboratory Medicine"),
+                            p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
+
+                          ),
+                          box(title=HTML("<b>Links</b>"),status="primary",width=2,
+                            p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
+                            p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/"))
+                            #p(a("Publication",href=""))
+                          ),
+                          box(width=2,status="primary",
+                              img(src='logo.png',width="52%",style="display: block; margin-left: auto; margin-right: auto;"),
+                              ),
+                          box(width=4,status="primary",
+                              #img(src='logo.png',width="20%",style="float:left"),
+                              img(src='qmp.png',width="40%",style="float:left"),
+                              img(src='uni_logo.jfif',width="50%",style="float:left"),
+
+                          )
                         ),
-                     box(width=2,title="Links",solidHeader=TRUE,status="primary",
-                             p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
-                             p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
-                             p(a("Publication",href="")),
-
-                             #p(a("Publication",href=""))
-                             )
-                      ),
-                      # column(width=6,
-                      #        br(),
-                      #        img(src='hexlogo.png',width="92%")
-                      # )
-
-
                   fluidRow(
-                    box(title="Description",solidHeader=TRUE,status="primary",
+                    box(title=HTML("<b>The PRIME Panel</b>"),status="warning",
                         p("Linear mixes models were created to show the change of multiple metabolites over time."),
                         p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
                         p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time."),
@@ -264,18 +282,22 @@ ui <- dashboardPage(
                     )
                   ),
                   fluidRow(
-                    box(title="Data",solidHeader=TRUE,status="primary",
+                    box(title=HTML("<b>Modules</b>"),status="success",width=12,
+                    box(title=HTML("<b>Data</b>"),status="success",width=4,
                         p("The Data tab shows different ways of highlighting the different stability time-points in minutes. The time-points are sorted according to their SPREC classification. In addition, there is an alternative way of presenting the date in form of lollipop plots."),
                         p("The data is split according the two different delays (pre- and post-centrifugation")
                         ),
-                    box(title="QC-Panel",solidHeader=TRUE,status="primary",
+                    box(title=HTML("<b>QC-Panel</b>"),status="success",width=4,
                         p("The 'Single' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a Slider. A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe. The colors, as well as the % threshholds, can be adjusted. The table can be downloaded as a .HTML report or the table directly as .csv (or other formats)."),
                         p("The batch tab allows the same procedure but with an uploaded table with pre- and post-centrifugation times to allow batch processing")
                         ),
-                    box(title="Tools",solidHeader=TRUE,status="primary",
+                    box(title=HTML("<b>Tools</b>"),status="success",width=4,
                         p("An additional tab for Tools is available. Currently it consists of a tool for calculating the pre- and post-centrifugation times from the differences of date+time stamps. However a specific format is needed. See examples.")
                         )
                   )
+                  )
+                  )
+                    )
           ),
 
 # Pre ---------------------------------------------------------------------
@@ -284,13 +306,13 @@ ui <- dashboardPage(
           tabItem(tabName="blood_data_pre",
                   fluidRow(
                     column(width=3,
-                      box(width=10, title="Pre-Centrifugation Input",solidHeader=TRUE, status="primary",
+                      box(width=10, title=HTML("<b>Pre-Centrifugation Input</b>"), status="primary",
                                   numericInput("pb_plots_pre_percent","Enter threshhold (%)",value=20),
                                   numericInput("pb_plots_pre_cutoff","Enter plot cutoff (h)",value=10)
                         )
                     ),
                     column(width=3,
-                        box(width=12,title="Info",solidHeader=TRUE,status="primary",
+                        box(width=12,title=HTML("<b>Info</b>"),status="primary",
                             p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
                             p("The plot cutoff can be used to declutter the lollipop plots"),
                             p("The table displays the different parameters according to the SPREC caterogies.")
@@ -345,13 +367,13 @@ ui <- dashboardPage(
           tabItem(tabName="blood_data_post",
                   fluidRow(
                     column(width=3,
-                           box(width=10, title="Post-Centrifugation Input",solidHeader=TRUE, status="primary",
+                           box(width=10, title=HTML("<b>Post-Centrifugation Input</b>"), status="primary",
                                numericInput("pb_plots_post_percent","Enter threshhold (%)",value=20),
                                numericInput("pb_plots_post_cutoff","Enter plot cutoff (h)",value=10)
                            )
                     ),
                     column(width=3,
-                           box(width=12,title="Info",solidHeader=TRUE,status="primary",
+                           box(width=12,title=HTML("<b>Info</b>"),status="primary",
                                p("Enter the threshhold for the stability (i.e. 30% means a 30% change from it original value at 0 hours."),
                                p("The plot cutoff can be used to declutter the lollipop plots"),
                                p("The table displays the different parameters according to the SPREC caterogies.")
@@ -400,14 +422,14 @@ ui <- dashboardPage(
           tabItem(tabName="blood_tables",
                   fluidRow(
                           box(
-                              width=2,title="Sample Type",solidHeader=TRUE,status="primary",
+                              width=2,title=HTML("<b>Sample Type</b>"),status="primary",
                                 column(
                                     width=12,align="center",
                                     radioGroupButtons("sample_type","Select sample type:",choices=c("EDTA"="edta","Lithium-Heparin"="lihep","Serum"="serum"),selected="edta",direction="vertical")
                                 )
                           ),
                           box(
-                              width=6,title="Style",solidHeader=TRUE,status="primary",
+                              width=6,title=HTML("<b>Style</b>"),status="primary",
                               fluidRow(
                                 column(width=3,
                                        box(width=12,
@@ -427,19 +449,19 @@ ui <- dashboardPage(
                                 )
                               )
                           ),
-                          box(width=2,title="Tolerable Error",solidHeader=TRUE,status="primary",
+                          box(width=2,title=HTML("<b>Tolerable Error</b>"),status="primary",
                               p("Enter tolerable error in percent"),
                               numericInput("error","
                                            Error in %", value=15)),
                           box(
-                            width=2,title="Download Output",solidHeader=TRUE,status="primary",
+                            width=2,title=HTML("<b>Download Output</b>"),status="primary",
                             p("Download a report as interactive HTML file.",align="justify"),
                             downloadButton("report", "Generate HTML report")
                           )
 
                   ),
                   fluidRow(
-                          box(width=8,title="Centrifugation Times",solidHeader=TRUE,status="primary",
+                          box(width=8,title=HTML("<b>Centrifugation Times</b>"),status="primary",
                               sliderInput("TTZ",
                                           "Pre-Centrifugation Time:",
                                           min = 0,
@@ -498,7 +520,7 @@ ui <- dashboardPage(
           tabItem(tabName="blood_tables_batch",
                   fluidRow(
                     column(width=3,
-                           box(width=12,title="Sample Type",solidHeader=TRUE,status="primary",
+                           box(width=12,title=HTML("<b>Sample Type</b>"),status="primary",
                                fluidRow(
 
                                  column(
@@ -513,7 +535,7 @@ ui <- dashboardPage(
                                p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper"),
                            ),
                            box(
-                             width=12,title="Style",solidHeader=TRUE,status="primary",
+                             width=12,title=HTML("<b>Style</b>"),status="primary",
                              fluidRow(
                                column(width=6,
                                       box(width=12,
@@ -531,12 +553,12 @@ ui <- dashboardPage(
                                ),
                              )
                            ),
-                           box(width=6,title="Tolerable Error",solidHeader=TRUE,status="primary",
+                           box(width=6,title=HTML("<b>Tolerable Error</b>"),status="primary",
                                p("Enter tolerable error in percent"),
                                numericInput("b_error","
                                            Error in %", value=15)),
                            box(
-                             width=6,title="Download Output",solidHeader=TRUE,status="primary",
+                             width=6,title=HTML("<b>Download Output</b>"),status="primary",
                              p("Download a report as interactive HTML file.",align="justify"),
                              downloadButton("batch_report", "Generate Report")
                            )
@@ -546,20 +568,20 @@ ui <- dashboardPage(
 
 
                     column(width=9,
-                           box(width=4, title="Pre-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                           box(width=4, title=HTML("<b>Pre-Centrifugation Histogramm</b>"), status="primary",
                                plotlyOutput("pre_histo")
 
                            ),
-                           box(width=4, title="Post-Centrifugation Histogramm",solidHeader=TRUE, status="primary",
+                           box(width=4, title=HTML("<b>Post-Centrifugation Histogramm</b>"), status="primary",
                                plotlyOutput("post_histo")
                            ),
-                           box(width=4, title="2D Hex Histogramm",solidHeader=TRUE, status="primary",
+                           box(width=4, title=HTML("<b>2D Hex Histogramm</b>"), status="primary",
                                plotlyOutput("combo_histo")
                            ),
-                           box(width=4, title="Pre-Centrifugation SPREC Distribution",solidHeader=TRUE, status="primary",
+                           box(width=4, title=HTML("<b>Pre-Centrifugation SPREC Distribution</b>"),status="primary",
                                plotOutput("pre_sprec_pie")
                            ),
-                           box(width=4, title="Post-Centrifugation SPREC Distribution",solidHeader=TRUE, status="primary",
+                           box(width=4, title=HTML("<b>Post-Centrifugation SPREC Distribution</b>"), status="primary",
                                plotOutput("post_sprec_pie")
                            )
                            #box(width=4, title="SPREC Distribution",solidHeader=TRUE, status="primary",
@@ -572,7 +594,7 @@ ui <- dashboardPage(
                            )
                   ),
                   fluidRow(
-                    box(width=12,title="Output",solidHeader=TRUE,status="primary",
+                    box(width=12,title=HTML("<b>Output</b>"),status="primary",
                         DT::dataTableOutput('batch_datatable')
                     )
                     # box(width=12,title="Output",solidHeader=TRUE,status="primary",
@@ -590,7 +612,7 @@ ui <- dashboardPage(
           tabItem(tabName="blood_tables_helper",
                   fluidRow(
                   box(
-                    width=2,title="Sample File",solidHeader=TRUE,status="primary",
+                    width=2,title=HTML("<b>Sample File</b>"),status="primary",
                     fileInput("helper_file", "File input", multiple=FALSE),
                   ),
                   box(
@@ -599,18 +621,18 @@ ui <- dashboardPage(
                     p("Currently it requires the following columnnames: ID, Draw, Centrifugation, Freeze"),
                     p("An example table is included on the GitHub page.")
                   ),
-                  box(width=2,title="Download",solidHeader=TRUE,status="primary",
+                  box(width=2,title=HTML("<b>Download</b>"),status="primary",
                       downloadButton("download_helper", "Download Template")
                   )
                   ),
                   fluidRow(
-                    box(width=2,title="SPREC",solidHeader=TRUE,status="primary",
+                    box(width=2,title=HTML("<b>SPREC</b>"),status="primary",
                     shinyWidgets::radioGroupButtons("sprec","Calculate SPREC?",
                                                     choices = list("Yes" = "Yes", "No" = "No"),
                                                     selected = "Yes")
 
                     ),
-                    box(width=3,title="Centrifugation",solidHeader=TRUE,status="primary",
+                    box(width=3,title=HTML("<b>Centrifugation</b>"),status="primary",
                         sliderInput("centtime",
                                     "Duration of Centrifugation:",
                                     min = 0,
@@ -621,7 +643,7 @@ ui <- dashboardPage(
                     )
                   ),
                   fluidRow(
-                    box(title="Output",solidHeader=TRUE,status="primary",
+                    box(title=HTML("<b>Output</b>"),status="primary",
                         width=12,
                     DT::dataTableOutput('helper_datatable')
                     )
