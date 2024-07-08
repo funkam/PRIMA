@@ -260,8 +260,8 @@ ui <- dashboardPage(
                           ),
                           box(title=HTML("<b>Links</b>"),status="primary",width=2,
                             p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
-                            p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/"))
-                            #p(a("Publication",href=""))
+                            p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
+                            p(a("Publication",href=""))
                           ),
                           box(width=2,status="primary",
                               img(src='logo.png',width="52%",style="display: block; margin-left: auto; margin-right: auto;"),
@@ -274,11 +274,11 @@ ui <- dashboardPage(
                           )
                         ),
                   fluidRow(
-                    box(title=HTML("<b>The PRIME Panel</b>"),status="warning",
-                        p("Linear mixes models were created to show the change of multiple metabolites over time."),
-                        p("The data is then presented as change (in %) to its original value for pre-centrifugation times."),
-                        p("For post-centrifugation times the change is calculated as an additinal effect on the value already altered by the pre-centrifugation time."),
-                        p("The Panel is split into producing plots, as well as color-coded tables.")
+                    box(title=HTML("<b>The PRIME Panel</b>"),status="warning",width=10,
+                        p("The PRIME-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
+                        p("Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays"),
+                        p("The data is presented in so called stability timepoints. Such a timepoint is defined as the time it takes for a parameter to change by a specific percentage. For example: A value of 0.2 for lactic acid in serum would mean it would take 0.2 hours when the % threshold is set to 20 % change."),
+                        p("Further, the effect of these processing delays can be explored entering real pre-analytical data and observing the direct effect of the dealys on the parameterts. Here, interactive HTML reports can be created.")
                     )
                   ),
                   fluidRow(
@@ -429,7 +429,7 @@ ui <- dashboardPage(
                                 )
                           ),
                           box(
-                              width=6,title=HTML("<b>Style</b>"),status="primary",
+                              width=6,title=HTML("<b>Style</b>"),status="success",
                               fluidRow(
                                 column(width=3,
                                        box(width=12,
@@ -449,19 +449,19 @@ ui <- dashboardPage(
                                 )
                               )
                           ),
-                          box(width=2,title=HTML("<b>Tolerable Error</b>"),status="primary",
+                          box(width=2,title=HTML("<b>Tolerable Error</b>"),status="success",
                               p("Enter tolerable error in percent"),
                               numericInput("error","
                                            Error in %", value=15)),
                           box(
-                            width=2,title=HTML("<b>Download Output</b>"),status="primary",
+                            width=2,title=HTML("<b>Download Output</b>"),status="success",
                             p("Download a report as interactive HTML file.",align="justify"),
                             downloadButton("report", "Generate HTML report")
                           )
 
                   ),
                   fluidRow(
-                          box(width=8,title=HTML("<b>Centrifugation Times</b>"),status="primary",
+                          box(width=8,title=HTML("<b>Centrifugation Times</b>"),status="warning",
                               sliderInput("TTZ",
                                           "Pre-Centrifugation Time:",
                                           min = 0,
@@ -494,7 +494,7 @@ ui <- dashboardPage(
                   #   )
                   # ),
                   fluidRow(
-                          box(width=12,
+                          box(width=12,status="info",
                             DT::dataTableOutput('datatable')
                           )
                   )
@@ -568,20 +568,20 @@ ui <- dashboardPage(
 
 
                     column(width=9,
-                           box(width=4, title=HTML("<b>Pre-Centrifugation Histogramm</b>"), status="primary",
+                           box(width=4, title=HTML("<b>Pre-Centrifugation Histogramm</b>"), status="warning",
                                plotlyOutput("pre_histo")
 
                            ),
-                           box(width=4, title=HTML("<b>Post-Centrifugation Histogramm</b>"), status="primary",
+                           box(width=4, title=HTML("<b>Post-Centrifugation Histogramm</b>"), status="success",
                                plotlyOutput("post_histo")
                            ),
-                           box(width=4, title=HTML("<b>2D Hex Histogramm</b>"), status="primary",
+                           box(width=4, title=HTML("<b>2D Hex Histogramm</b>"), status="danger",
                                plotlyOutput("combo_histo")
                            ),
-                           box(width=4, title=HTML("<b>Pre-Centrifugation SPREC Distribution</b>"),status="primary",
+                           box(width=4, title=HTML("<b>Pre-Centrifugation SPREC Distribution</b>"),status="warning",
                                plotOutput("pre_sprec_pie")
                            ),
-                           box(width=4, title=HTML("<b>Post-Centrifugation SPREC Distribution</b>"), status="primary",
+                           box(width=4, title=HTML("<b>Post-Centrifugation SPREC Distribution</b>"), status="success",
                                plotOutput("post_sprec_pie")
                            )
                            #box(width=4, title="SPREC Distribution",solidHeader=TRUE, status="primary",
@@ -594,7 +594,7 @@ ui <- dashboardPage(
                            )
                   ),
                   fluidRow(
-                    box(width=12,title=HTML("<b>Output</b>"),status="primary",
+                    box(width=12,title=HTML("<b>Output</b>"),status="info",
                         DT::dataTableOutput('batch_datatable')
                     )
                     # box(width=12,title="Output",solidHeader=TRUE,status="primary",
@@ -610,12 +610,14 @@ ui <- dashboardPage(
 # Tools -------------------------------------------------------------------
 
           tabItem(tabName="blood_tables_helper",
+                  box(width=12,
                   fluidRow(
+
                   box(
                     width=2,title=HTML("<b>Sample File</b>"),status="primary",
                     fileInput("helper_file", "File input", multiple=FALSE),
                   ),
-                  box(
+                  box(status="info",
                     p("This tool converts time stamp entries in the format of DMY H:M, the delimiter between DMY does not matter. / or : or - will all work"),
                     p("It then calclualted pre-centrifugation, post-centrifugation and total time-to-freeze to be used by the bath processor"),
                     p("Currently it requires the following columnnames: ID, Draw, Centrifugation, Freeze"),
@@ -626,13 +628,13 @@ ui <- dashboardPage(
                   )
                   ),
                   fluidRow(
-                    box(width=2,title=HTML("<b>SPREC</b>"),status="primary",
-                    shinyWidgets::radioGroupButtons("sprec","Calculate SPREC?",
+                    box(width=2,title=HTML("<b>SPREC</b>"),status="warning",
+                    shinyWidgets::radioGroupButtons("sprec","Create SPREC Classification columns?",
                                                     choices = list("Yes" = "Yes", "No" = "No"),
                                                     selected = "Yes")
 
                     ),
-                    box(width=3,title=HTML("<b>Centrifugation</b>"),status="primary",
+                    box(width=5,title=HTML("<b>Centrifugation</b>"),status="warning",
                         sliderInput("centtime",
                                     "Duration of Centrifugation:",
                                     min = 0,
@@ -641,12 +643,12 @@ ui <- dashboardPage(
                                     step=1),
                         p("If the centrifguation time stamp is from the beginning of the centrifugation, the duration of the centrifugation needs to be subtracted for an accurate post-centrifugation SPREC.")
                     )
+                  )
                   ),
-                  fluidRow(
-                    box(title=HTML("<b>Output</b>"),status="primary",
+                    box(title=HTML("<b>Output</b>"),status="info",
                         width=12,
                     DT::dataTableOutput('helper_datatable')
-                    )
+
                   )
           )
       )
@@ -1156,7 +1158,8 @@ output$datatable<-renderDataTable({
       theme_classic()+
       xlab("Pre-Cent / Hours")+
       ylab("Post-Cent / Hours")+
-      theme(legend.position="none",axis.text =element_text(size=16),axis.title=element_text(size=18,face="bold"))
+      labs(fill="Count")+
+      theme(axis.text =element_text(size=16),axis.title=element_text(size=18,face="bold"))
   })
 
 
@@ -1211,7 +1214,7 @@ output$datatable<-renderDataTable({
     ggplot(df,aes(area=n,fill=SPREC_PRE,label=SPREC_PRE))+
       geom_treemap(color="white")+
       geom_treemap_text(color="white",place="centre",fontface="bold")+
-      #scale_fill_viridis(discrete=TRUE,option="H")+
+      scale_fill_brewer(palette="Set1")+
       theme(legend.position = "none")
 
   })
@@ -1231,7 +1234,7 @@ output$datatable<-renderDataTable({
     ggplot(df,aes(area=n,fill=SPREC_POST,label=SPREC_POST))+
       geom_treemap(color="white")+
       geom_treemap_text(color="white",place="centre",fontface="bold")+
-      #scale_fill_viridis(discrete=TRUE,option="H")+
+      scale_fill_brewer(palette="Set1")+
       theme(legend.position = "none")
 
 
