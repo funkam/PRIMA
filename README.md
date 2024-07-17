@@ -1,5 +1,7 @@
 # PRIMA-Panel
 Welcome to the pages of the <b>Pr</b>e-Analytical <b>Investigator</b> for NMR-based <b>M</b>et<b>a</b>bolomics
+<img align="right" width="200" height="200" src="https://github.com/funkam/QC-Tool/blob/main/www/logo.png">
+
 
 The PRIMA-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum).
 Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays
