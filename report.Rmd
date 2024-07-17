@@ -1,5 +1,5 @@
 ---
-title: "PRIME-Panel Report"
+title: "PRIMA-Panel Performance Report" 
 date: "`r Sys.Date()`"
 outputl: html_document
 params:
@@ -22,16 +22,28 @@ params:
 
 ``` {r logo, echo=FALSE}
 
-htmltools::img(src = knitr::image_uri("C:/Users/funkalexa/Documents/Code/QC-Tool/QC-Tool/logo.png"), 
+htmltools::img(src = knitr::image_uri("C:/Users/funkalexa/Documents/Code/QC-Tool/QC-Tool/www/logo.png"), 
                alt = 'logo', 
-               style = 'position:absolute; top:0; right:0; padding:10px; width: 200px; height: 200px') # Added width and height as CSS
+               style = 'float:left; padding:2px; width: 180px; height: 180px') # Added width and height as CSS
+
+
 ```
 
-A PRIME Panel Report has been generated. The report contains information about the pre-analytical composition of the data. It has generated graphs and tables for pre- and post-centrifugation delays. It applied these data to the established parameter models to estimate changes per processing delays for each metabolic parameter.
 
 <br>
+A <b>PRIMA</b>-Panel report has been generated. The report contains information about the pre-analytical composition of the cohort. It has generated graphs and tables for pre- and post-centrifugation delays. It applied these data to the established parameter models to estimate changes per processing delays for each metabolic parameter. 
 <br>
 <br>
+Developed by [Alexander Funk](https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS) at University Hospital Dresden. <br>
+If you have used PRIMA-Reports in your research please cite our [publication.]()
+<br>
+<br>
+<br>
+
+
+
+
+---
 
 # Meta Information
 
@@ -49,7 +61,7 @@ kable(params$post_sprec) %>% kable_styling(full_width = FALSE, position = "left"
 
 <br>
 
-## Histograms
+## 1D Histograms
 Histograms show the distribution over the processing delays for the pre-centrifugation delays (left) and post-centrifugation delays (right).
 
 ``` {r histo, echo=FALSE, fig.show="hold",out.width="45%"}
@@ -59,8 +71,8 @@ params$post_histo
 
 ```
 
-## 2D Hex Distribution
-The 2D hex distribtuion plot combines desnitiy maps for pre-centrifugation as well as post-centrifugation delays to give a combined overview
+## 2D Hex Density Distribution
+The 2D hex distribution plot combines destiny maps for pre-centrifugation as well as post-centrifugation delays to give a combined overview
 
 ``` {r hex, echo=FALSE, fig.show="hold",out.width="60%"}
 
@@ -80,11 +92,14 @@ params$gg_post_pie
 
 <br>
 
+---
+
+
 # Metabolite Predictions
 
-The metabolite predictions were performed wit the given pre-centrifugation and post-centrifguation delays.
+The metabolite predictions were performed with the given pre-centrifugation and post-centrifguation delays.
 The input error was considered to filter out parameters with error values above this threshold:
-`r params$error_input`
+`r params$error_input` %
 
 
 

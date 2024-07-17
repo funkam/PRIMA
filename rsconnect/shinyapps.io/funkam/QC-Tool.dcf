@@ -1,0 +1,12 @@
+name: QC-Tool
+title: QC-Tool
+username:
+account: funkam
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8124791
+bundleId: 7925857
+url: https://funkam.shinyapps.io/QC-Tool/
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: logo.png|QC_Tool_base.R|www/hexlogo.png

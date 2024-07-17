@@ -152,7 +152,7 @@ date_helper<-function(df,sprec,centtime){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title="PRIME Panel"),
+    dashboardHeader(title="PRIMA Panel"),
     dashboardSidebar(
       sidebarMenu(
                   collapsed=FALSE,
@@ -250,7 +250,7 @@ ui <- dashboardPage(
                   fluidRow(
                     box(width=12,
 
-                        br(),h1(HTML("<b>PRIME</b> Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR based <b>Me</b>tabolomics")),br(),br(),
+                        br(),h1(HTML("<b>PRIMA</b> Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR based <b>M</b>et<b>a</b>bolomics")),br(),br(),
                         fluidRow(
                           box(title=HTML("<b>Author</b>"), status="primary",width=4,
                             p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
@@ -264,7 +264,7 @@ ui <- dashboardPage(
                             p(a("Publication",href=""))
                           ),
                           box(width=2,status="primary",
-                              img(src='logo.png',width="52%",style="display: block; margin-left: auto; margin-right: auto;"),
+                              img(src='logo.png',width="63%",style="display: block; margin-left: auto; margin-right: auto;"),
                               ),
                           box(width=4,status="primary",
                               #img(src='logo.png',width="20%",style="float:left"),
@@ -274,8 +274,8 @@ ui <- dashboardPage(
                           )
                         ),
                   fluidRow(
-                    box(title=HTML("<b>The PRIME Panel</b>"),status="warning",width=10,
-                        p("The PRIME-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
+                    box(title=HTML("<b>The PRIMA Panel</b>"),status="warning",width=10,
+                        p("The PRIMA-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
                         p("Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays"),
                         p("The data is presented in so called stability timepoints. Such a timepoint is defined as the time it takes for a parameter to change by a specific percentage. For example: A value of 0.2 for lactic acid in serum would mean it would take 0.2 hours when the % threshold is set to 20 % change."),
                         p("Further, the effect of these processing delays can be explored entering real pre-analytical data and observing the direct effect of the dealys on the parameterts. Here, interactive HTML reports can be created.")
