@@ -1,12 +1,10 @@
 # PRIMA-Panel
-Welcome to the pages of the <b>Pr</b>e-Analytical <b>Investigator</b> for NMR-based <b>M</b>et<b>a</b>bolomics
+Welcome to the pages of the <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR-based <b>M</b>et<b>a</b>bolomics (PRIMA-Panel)
 <img align="right" width="200" height="200" src="https://github.com/funkam/QC-Tool/blob/main/www/logo.png">
 
+The PRIMA-Panel is a tool to investigate the effect of processing delays on metabolic parameters in samples of peripheral blood (plasma / serum). <br>
+The panel functions as a data expoloration tool. It allows to investigate the these effects interactively. Additionally, the PRIMA-Panel allows the creation of so called performance reports for sample cohorts. Here a data table with pre-analytical information can be uploaded
 
-The PRIMA-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum).
-Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays
-The data is presented in so called stability timepoints. Such a timepoint is defined as the time it takes for a parameter to change by a specific percentage. For example: A value of 0.2 for lactic acid in serum would mean it would take 0.2 hours when the % threshold is set to 20 % change.
-Further, the effect of these processing delays can be explored entering real pre-analytical data and observing the direct effect of the dealys on the parameterts. Here, interactive HTML reports can be created.
 
 # Modules
 
