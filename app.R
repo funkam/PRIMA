@@ -152,7 +152,7 @@ date_helper<-function(df,sprec,centtime){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title="PRIMA Panel"),
+    dashboardHeader(title=div(img(src="logo.png",width="20%"),"PRIMA-Panel")),
     dashboardSidebar(
       sidebarMenu(
                   collapsed=FALSE,
@@ -184,22 +184,29 @@ ui <- dashboardPage(
                               border-right: 3px solid #254264;
 
         }
-         /* logo when hovered */
-        .skin-blue .main-header .logo:hover .sidebar-toggle:hover {
-                              background-color: #000000;
-                              color:#ffffff;
+                 /* logo when hovered */
+        .skin-blue .main-header .logo:hover{
+                              background-color: #ffffff;
+                              color:#000000;
 
                               }
+                   /* toggle button when hovered */
+        .skin-blue .main-header .navbar .sidebar-toggle {
+                              background-color: #ffffff;
+                              color:#000000;
+                              }
+         /* toggle button when hovered */
+        .skin-blue .main-header .navbar .sidebar-toggle:hover {
+                              background-color: #ffffff;
+                              color:#000000;
+                              }
+
         /* navbar (rest of the header) */
         .skin-blue .main-header .navbar {
                               background-color: #ffffff;
                               color:#000000;
 
         }
-        .skin-blue .main-header .sidebar-toggle {
-                              background-color: #ffffff;
-                              color:#000000;
-                              }
 
         /* main sidebar */
         .skin-blue .main-sidebar {
@@ -225,11 +232,8 @@ ui <- dashboardPage(
                               font-style:italic;
                               font-weight:bold;
          }
-        /* toggle button when hovered  */
-         .skin-blue .main-header .navbar .sidebar-toggle{
-                              color:#000000;
-                              }
-        /* toggle button when hovered  */
+
+        /* box background
          .skin-blue .box.box-solid.box-primary>.box-header {
                               background-color: #ffffff;
                               color:#000000;
@@ -250,8 +254,11 @@ ui <- dashboardPage(
                   fluidRow(
                     box(width=12,
 
-                        br(),h1(HTML("<b>PRIMA</b> Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR based <b>M</b>et<b>a</b>bolomics")),br(),br(),
+                        br(),h1(HTML("<b>PRIMA</b>-Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR-based <b>M</b>et<b>a</b>bolomics")),br(),br(),
                         fluidRow(
+                          box(width=2,status="primary",
+                              img(src='logo.png',width="63%",style="display: block; margin-left: auto; margin-right: auto;"),
+                          ),
                           box(title=HTML("<b>Author</b>"), status="primary",width=4,
                             p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
                             p("Institute for Clinical Chemistry and Laboratory Medicine"),
@@ -263,9 +270,7 @@ ui <- dashboardPage(
                             p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
                             p(a("Publication",href=""))
                           ),
-                          box(width=2,status="primary",
-                              img(src='logo.png',width="63%",style="display: block; margin-left: auto; margin-right: auto;"),
-                              ),
+
                           box(width=4,status="primary",
                               #img(src='logo.png',width="20%",style="float:left"),
                               img(src='qmp.png',width="40%",style="float:left"),
