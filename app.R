@@ -18,6 +18,7 @@ library(tibble)
 library(lubridate)
 library(ggrepel)
 library(treemapify)
+library(viridis)
 
 #data input
 LM_pre<-read.csv("Precent_LM_all_final.csv",stringsAsFactors = FALSE)

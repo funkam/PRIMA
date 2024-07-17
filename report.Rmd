@@ -21,14 +21,14 @@ params:
 ---
 
 ``` {r logo, echo=FALSE}
-
-htmltools::img(src = knitr::image_uri("C:/Users/funkalexa/Documents/Code/QC-Tool/QC-Tool/www/logo.png"), 
-               alt = 'logo', 
-               style = 'float:left; padding:2px; width: 180px; height: 180px') # Added width and height as CSS
-
-
+library(here)
+  htmltools::img(src = knitr::image_uri(here("logo.png")),
+ # #htmltools::img(src = knitr::image_uri("../www/logo.png"), 
+                 alt = 'logo', 
+                 style = 'float:left; padding:2px; width: 180px; height: 180px') # Added width and height as CSS
+  
+#knitr::include_graphics(here("logo.png").wid)
 ```
-
 
 <br>
 A <b>PRIMA</b>-Panel report has been generated. The report contains information about the pre-analytical composition of the cohort. It has generated graphs and tables for pre- and post-centrifugation delays. It applied these data to the established parameter models to estimate changes per processing delays for each metabolic parameter. 
