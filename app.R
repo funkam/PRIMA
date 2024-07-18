@@ -153,7 +153,8 @@ date_helper<-function(df,sprec,centtime){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title=div(img(src="logo.png",width="20%"),"PRIMA-Panel")),
+    dashboardHeader(title="PRIMA-Panel"),
+
     dashboardSidebar(
       sidebarMenu(
                   collapsed=FALSE,
@@ -243,7 +244,13 @@ ui <- dashboardPage(
         .content-wrapper, .right-side {
                               background-color: #ffffff;
         }
-        .box{-webkit-box-shadow: none; -moz-box-shadow: none;box-shadow: none;}
+        .box{
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;}
+
+      .box-info{border-top-style: none;}
+
         '))),
 
 
@@ -253,26 +260,26 @@ ui <- dashboardPage(
       tabItems(
           tabItem(tabName="home",
                   fluidRow(
-                    box(width=12,
+                    box(width=12, status = "info",
 
                         br(),h1(HTML("<b>PRIMA</b>-Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR-based <b>M</b>et<b>a</b>bolomics")),br(),br(),
                         fluidRow(
-                          box(width=2,status="primary",
+                          box(width=2,status="info",
                               img(src='logo.png',width="63%",style="display: block; margin-left: auto; margin-right: auto;"),
                           ),
-                          box(title=HTML("<b>Author</b>"), status="primary",width=4,
+                          box(title=HTML("<b>Author</b>"),status="info",width=4,
                             p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
                             p("Institute for Clinical Chemistry and Laboratory Medicine"),
                             p("University Hospital Dresden, Fetscherstr. 74, 01307 Dresden")
 
                           ),
-                          box(title=HTML("<b>Links</b>"),status="primary",width=2,
+                          box(title=HTML("<b>Links</b>"),status="info",width=2,
                             p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
                             p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
                             p(a("Publication",href=""))
                           ),
 
-                          box(width=4,status="primary",
+                          box(width=4,status="info",
                               #img(src='logo.png',width="20%",style="float:left"),
                               img(src='qmp.png',width="40%",style="float:left"),
                               img(src='uni_logo.jfif',width="50%",style="float:left"),
@@ -280,7 +287,7 @@ ui <- dashboardPage(
                           )
                         ),
                   fluidRow(
-                    box(title=HTML("<b>The PRIMA Panel</b>"),status="warning",width=10,
+                    box(title=HTML("<b>The PRIMA Panel</b>"),status="warning",width=12,
                         p("The PRIMA-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
                         p("Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays"),
                         p("The data is presented in so called stability timepoints. Such a timepoint is defined as the time it takes for a parameter to change by a specific percentage. For example: A value of 0.2 for lactic acid in serum would mean it would take 0.2 hours when the % threshold is set to 20 % change."),
@@ -500,7 +507,7 @@ ui <- dashboardPage(
                   #   )
                   # ),
                   fluidRow(
-                          box(width=12,status="info",
+                          box(width=12,status="primary",
                             DT::dataTableOutput('datatable')
                           )
                   )
@@ -600,7 +607,7 @@ ui <- dashboardPage(
                            )
                   ),
                   fluidRow(
-                    box(width=12,title=HTML("<b>Output</b>"),status="info",
+                    box(width=12,title=HTML("<b>Output</b>"),status="primary",
                         DT::dataTableOutput('batch_datatable')
                     )
                     # box(width=12,title="Output",solidHeader=TRUE,status="primary",
@@ -616,14 +623,14 @@ ui <- dashboardPage(
 # Tools -------------------------------------------------------------------
 
           tabItem(tabName="blood_tables_helper",
-                  box(width=12,
+                  box(width=12,status="info",
                   fluidRow(
 
                   box(
                     width=2,title=HTML("<b>Sample File</b>"),status="primary",
                     fileInput("helper_file", "File input", multiple=FALSE),
                   ),
-                  box(status="info",
+                  box(status="primary",
                     p("This tool converts time stamp entries in the format of DMY H:M, the delimiter between DMY does not matter. / or : or - will all work"),
                     p("It then calclualted pre-centrifugation, post-centrifugation and total time-to-freeze to be used by the bath processor"),
                     p("Currently it requires the following columnnames: ID, Draw, Centrifugation, Freeze"),
@@ -651,7 +658,7 @@ ui <- dashboardPage(
                     )
                   )
                   ),
-                    box(title=HTML("<b>Output</b>"),status="info",
+                    box(title=HTML("<b>Output</b>"),status="primary",
                         width=12,
                     DT::dataTableOutput('helper_datatable')
 
