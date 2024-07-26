@@ -150,7 +150,7 @@ date_helper<-function(df,sprec,centtime){
 # UI ----------------------------------------------------------------------
 
 # Menu --------------------------------------------------------------------
-
+HTML("<")
 
 ui <- dashboardPage(
     dashboardHeader(title="PRIMA-Panel"),
@@ -177,6 +177,7 @@ ui <- dashboardPage(
 
 
     dashboardBody(
+      tags$head(tags$link(rel = "shortcut icon", href = "icon.ico")),
 
       tags$head(tags$style(HTML('
             /* logo */
@@ -261,11 +262,11 @@ ui <- dashboardPage(
           tabItem(tabName="home",
                   fluidRow(
                     box(width=12, status = "info",
-
-                        br(),h1(HTML("<b>PRIMA</b>-Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR-based <b>M</b>et<b>a</b>bolomics")),br(),br(),
+                        h1(HTML("<b>PRIMA</b>-Panel - <b>Pr</b>e-Analytical <b>I</b>nvestigator for NMR-based <b>M</b>et<b>a</b>bolomics")),br(),br(),
                         fluidRow(
+                          box(width=12,status="warning",
                           box(width=2,status="info",
-                              img(src='logo.png',width="63%",style="display: block; margin-left: auto; margin-right: auto;"),
+                              img(src='logo.png',width="80%",style="display: block; margin-left: auto; margin-right: auto;")
                           ),
                           box(title=HTML("<b>Author</b>"),status="info",width=4,
                             p("Developed by",a("Alexander Funk",href="https://www.uniklinikum-dresden.de/de/das-klinikum/kliniken-polikliniken-institute/klinische-chemie-und-laboratoriumsmedizin/forschung/copy_of_EMS")),
@@ -274,43 +275,57 @@ ui <- dashboardPage(
 
                           ),
                           box(title=HTML("<b>Links</b>"),status="info",width=2,
-                            p(a("GitHub",href="https://github.com/funkam/QC-Tool")),
-                            p(a("shinyapps.io",href="https://funkam.shinyapps.io/QC-Tool/")),
+                            p(a("GitHub",href="https://github.com/funkam/PRIMA")),
+                            p(a("shinyapps.io",href="https://funkam.shinyapps.io/PRIMA/")),
                             p(a("Publication",href=""))
                           ),
 
                           box(width=4,status="info",
+                              br(),
                               #img(src='logo.png',width="20%",style="float:left"),
                               img(src='qmp.png',width="40%",style="float:left"),
-                              img(src='uni_logo.jfif',width="50%",style="float:left"),
+                              img(src='uni_logo.jfif',width="50%",style="float:left")
 
+                          )
                           )
                         ),
                   fluidRow(
                     box(title=HTML("<b>The PRIMA Panel</b>"),status="warning",width=12,
-                        p("The PRIMA-Panel is tool to investigate the effect processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
+                        p("The PRIMA-Panel is tool to investigate the effects of processing delays on metabolic parameters in samples of peripheral blood (plasma / serum)."),
                         p("Linear mixed models were used to estimate the change for each metabolic parameter. The data is split into pre- and postcentrinfugation delays"),
                         p("The data is presented in so called stability timepoints. Such a timepoint is defined as the time it takes for a parameter to change by a specific percentage. For example: A value of 0.2 for lactic acid in serum would mean it would take 0.2 hours when the % threshold is set to 20 % change."),
-                        p("Further, the effect of these processing delays can be explored entering real pre-analytical data and observing the direct effect of the dealys on the parameterts. Here, interactive HTML reports can be created.")
+                        p("Further, the effect of these processing delays can be explored entering real pre-analytical data and observing the direct effect of the dealys on the parameters. Here, interactive HTML reports can be created.")
                     )
                   ),
                   fluidRow(
                     box(title=HTML("<b>Modules</b>"),status="success",width=12,
                     box(title=HTML("<b>Data</b>"),status="success",width=4,
-                        p("The Data tab shows different ways of highlighting the different stability time-points in minutes. The time-points are sorted according to their SPREC classification. In addition, there is an alternative way of presenting the date in form of lollipop plots."),
-                        p("The data is split according the two different delays (pre- and post-centrifugation")
+                        p("The Data tab shows different ways of highlighting the different stability time-points in minutes. The time-points are sorted according to their SPREC classification. In addition, there is an alternative way of presenting the date in form of timeline plots."),
+                        p("The data is split according the two different delays (pre- and post-centrifugation).")
                         ),
-                    box(title=HTML("<b>QC-Panel</b>"),status="success",width=4,
-                        p("The 'Single' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a Slider. A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe. The colors, as well as the % threshholds, can be adjusted. The table can be downloaded as a .HTML report or the table directly as .csv (or other formats)."),
-                        p("The batch tab allows the same procedure but with an uploaded table with pre- and post-centrifugation times to allow batch processing")
+                    box(title=HTML("<b>Peformance Reports</b>"),status="success",width=4,
+                        p("The 'Single' tab allows the user to set a pre-centrifugation time and a post-centrifugation using a slider. A table is then generated that higlights a minor and a major change for each metabolite in that given timeframe. The colors, as well as the % threshholds, can be adjusted. The table can be downloaded as a .HTML report or the table directly as .csv (or other formats)."),
+                        p("The batch tab allows the same procedure but with an uploaded table with pre- and post-centrifugation times to allow batch processing of an entire sample cohort.")
                         ),
                     box(title=HTML("<b>Tools</b>"),status="success",width=4,
                         p("An additional tab for Tools is available. Currently it consists of a tool for calculating the pre- and post-centrifugation times from the differences of date+time stamps. However a specific format is needed. See examples.")
                         )
                   )
+                  ),
+                  fluidRow(
+                    box(title=HTML("<b>Info</b>"),status="primary",width=12,
+                        box(title=HTML("<b>Version Info</b>"),status="warning",width=4,
+                            p("For full version information check out",a("GitHub",href="https://github.com/funkam/PRIMA"),"page."),
+                            tableOutput("changelog")
+                        ),
+                        box(title=HTML("<b>Disclaimer</b>"),status="warning",width=4,
+                            p("If you use the data of PRIMA-Panel or even the performance reports in your work please cite our",a("publication.",href=""))
+                        )
+                        )
                   )
-                  )
-                    )
+                )
+              )
+
           ),
 
 # Pre ---------------------------------------------------------------------
@@ -416,7 +431,7 @@ ui <- dashboardPage(
                                       ),
                                       box(width=3,solidHeader=TRUE,status="primary",title="SPREC: M (>48h)",
                                           DT::dataTableOutput('pb_table_post_m')
-                                      ),
+                                      )
                                     )
                            ),
                            tabPanel(title="Plots",
@@ -542,10 +557,10 @@ ui <- dashboardPage(
                                  ),
                                  column(
                                    width=6,
-                                   fileInput("batch_file", "File input", multiple=FALSE),
+                                   fileInput("batch_file", "File input", multiple=FALSE)
                                  )
                                ),
-                               p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper"),
+                               p("The input file should be a .CSV with the following column headers: ID, PreCent, PostCent. Ideally it was created with the Batch Table Helper")
                            ),
                            box(
                              width=12,title=HTML("<b>Style</b>"),status="primary",
@@ -563,7 +578,7 @@ ui <- dashboardPage(
                                           numericInput("b_major","Major color %:",value=20),
                                           colourInput("b_major_color","Major Color:",value="red")
                                       )
-                               ),
+                               )
                              )
                            ),
                            box(width=6,title=HTML("<b>Tolerable Error</b>"),status="primary",
@@ -628,7 +643,7 @@ ui <- dashboardPage(
 
                   box(
                     width=2,title=HTML("<b>Sample File</b>"),status="primary",
-                    fileInput("helper_file", "File input", multiple=FALSE),
+                    fileInput("helper_file", "File input", multiple=FALSE)
                   ),
                   box(status="primary",
                     p("This tool converts time stamp entries in the format of DMY H:M, the delimiter between DMY does not matter. / or : or - will all work"),
@@ -670,6 +685,16 @@ ui <- dashboardPage(
 
 # Server ------------------------------------------------------------------
 server <- function(input, output) {
+
+changelog<-reactive({read.csv("changelog.csv")})
+
+output$changelog<-renderTable({
+  changelog()
+
+},width="100%")
+
+
+
 
   # Tables ------------------------------------------------------------------
     pb_plots_pre_percent<-reactive({input$pb_plots_pre_percent})
