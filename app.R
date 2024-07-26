@@ -163,7 +163,7 @@ ui <- dashboardPage(
                     menuSubItem("Pre-Centrifugation",tabName="blood_data_pre",icon=icon(("right-to-bracket"))), #alternative arrow-right-to-bracket, and arrow-left-to-bracket, right-from-bracket.left-from-bracket
                     menuSubItem("Post-Centrifugation",tabName="blood_data_post",icon=icon(("right-from-bracket")))
                   ),
-                  menuItem("QC Panels",tabName="blood_tables",icon=icon(("table")),
+                  menuItem("Performance Reports",tabName="blood_tables",icon=icon(("table")),
                     menuSubItem("Single Sample",tabName="blood_tables",icon=icon("folder")),
                     menuSubItem("Batch",tabName="blood_tables_batch",icon=icon("folder-tree"))
                   ),
