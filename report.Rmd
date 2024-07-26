@@ -23,9 +23,9 @@ params:
 ``` {r logo, echo=FALSE}
 library(here)
   htmltools::img(src = knitr::image_uri(here("logo.png")),
- # #htmltools::img(src = knitr::image_uri("../www/logo.png"), 
-                 alt = 'logo', 
-                 style = 'float:left; padding:2px; width: 180px; height: 180px') # Added width and height as CSS
+ ##htmltools::img(src = knitr::image_uri("../www/logo.png"), 
+                alt = 'logo', 
+               style = 'float:left; padding:2px; width: 180px; height: 180px') # Added width and height as CSS
   
 #knitr::include_graphics(here("logo.png").wid)
 ```

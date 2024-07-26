@@ -1297,7 +1297,9 @@ output$datatable<-renderDataTable({
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
       tempReport <- file.path(tempdir(), "report.Rmd")
+      tempPic <- file.path(tempdir(), "logo.png")
       file.copy("report.Rmd", tempReport, overwrite = TRUE)
+      file.copy("logo.png",tempPic,overwrite=TRUE)
 
       # Set up parameters to pass to Rmd document
       params <- list(
