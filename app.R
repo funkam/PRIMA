@@ -664,7 +664,7 @@ ui <- dashboardPage(
                     ),
                     box(width=5,title=HTML("<b>Centrifugation</b>"),status="warning",
                         sliderInput("centtime",
-                                    "Duration of Centrifugation:",
+                                    "Duration of Centrifugation in minutes:",
                                     min = 0,
                                     max = 20,
                                     value = 0,
