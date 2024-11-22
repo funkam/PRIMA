@@ -489,7 +489,7 @@ ui <- dashboardPage(
 
                   ),
                   fluidRow(
-                          box(width=8,title=HTML("<b>Centrifugation Times</b>"),status="warning",
+                          box(width=8,title=HTML("<b>Centrifugation Times in Hours</b>"),status="warning",
                               sliderInput("TTZ",
                                           "Pre-Centrifugation Time:",
                                           min = 0,
