@@ -309,7 +309,8 @@ ui <- dashboardPage(
                         ),
                     box(title=HTML("<b>Tools</b>"),status="success",width=4,
                         p("An additional tab for Tools is available. Currently it consists of a tool for calculating the pre- and post-centrifugation times from the differences of date+time stamps. However a specific format is needed. See examples.")
-                        )
+                        ),
+                        p("It should be noted that freeze-thaw cycles affect the metabolic profile in a similar way to prolonged centrifugation times. Freeze thaw-cycles were not included in the models and could alter the profile further.")
                   )
                   ),
                   fluidRow(
