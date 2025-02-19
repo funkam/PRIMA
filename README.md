@@ -21,5 +21,5 @@ An additional tab for Tools is available. Currently it consists of a tool for ca
 ---
 
 # Online Version
-This Shiny app is also permantently hosted on Shinyapps.io [here](https://funkam.shinyapps.io/QC-Tool/).
+This Shiny app is also permantently hosted on Shinyapps.io [here](https://funkam.shinyapps.io/PRIMA/).
 
